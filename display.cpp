@@ -36,7 +36,7 @@ ControllableDisplay_t::ControllableDisplay_t()
 {
     for(int i=0;i<4;++i)
         connect(Button[i], SIGNAL(selectedByMouse(int)), this, SLOT(emit_GotSignal_SelectCard(int)));
-    connect(Scene, SIGNAL(positionSelected(QPoint)), this, SLOT(positionSelected(QPoint)));
+    connect(Scene, SIGNAL(positionSelected(QPointF)), this, SLOT(positionSelected(QPointF)));
 }
 
 ControllableDisplay_t::~ControllableDisplay_t()
@@ -50,7 +50,7 @@ void ControllableDisplay_t::minionSelected(Minion_t* selMinion)
     emit gotSignal_SelectMinion(selMinion);
 }
 
-void ControllableDisplay_t::positionSelected(QPoint Position)
+void ControllableDisplay_t::positionSelected(QPointF Position)
 {
     qDebug() << "CD got posSel, " << Position.x(), Position.y();
     emit gotSignal_SelectPosition(Position);
@@ -81,7 +81,7 @@ void Button_t::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void MyQGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    QPoint pos = event->scenePos().toPoint();
+    QPointF pos = event->scenePos().toPoint();
     if( QGraphicsScene::items(pos).size() == 0 )
     {
         emit positionSelected(pos);

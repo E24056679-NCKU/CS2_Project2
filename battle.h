@@ -5,6 +5,7 @@
 #include <QObject>
 #include "minion.h"
 #include "tower.h"
+#include "arrow.h"
 
 class BattleManager_t : public QObject
 {
@@ -15,18 +16,18 @@ public:
     void initialize();
 
 public slots:
-    void addMinion(MinionType Type, MinionTeam Group, QPoint Position);
+    void addMinion(MinionType Type, MinionTeam Group, QPointF Position);
     void removeMinion(Minion_t* rmMinion);
 
     // incoming signals from controller1
-    void gotSignal1_SelectPosition(QPoint Position);
-    void gotSignal1_SelectMinion(QPoint Position);
+    void gotSignal1_SelectPosition(QPointF Position);
+    void gotSignal1_SelectMinion(QPointF Position);
     void gotSignal1_SelectMinion(Minion_t* selMinion);
     void gotSignal1_SelectCard(int CardID);
     // incoming signals from controller2
     // !! not implemented yet
-    void gotSignal2_SelectPosition(QPoint Position);
-    void gotSignal2_SelectMinion(QPoint Position);
+    void gotSignal2_SelectPosition(QPointF Position);
+    void gotSignal2_SelectMinion(QPointF Position);
     void gotSignal2_SelectMinion(Minion_t* selMinion);
     void gotSignal2_SelectCard(int CardID);
 
@@ -49,6 +50,8 @@ signals:
 protected:
     MinionManager_t* MinionManager;
     TowerManager_t* TowerManager;
+    ArrowManager_t* ArrowManager;
+
 
     int CardSelected_Player1; // default (no selected) = -1
     MinionType CardtoMinionType_Player1[4]; // store Card[i]'s MinionTypeID

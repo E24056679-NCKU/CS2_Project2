@@ -63,7 +63,7 @@ MinionManager_t::~MinionManager_t()
         delete i;
 }
 
-Minion_t *MinionManager_t::addMinion(MinionType Type, MinionTeam Team, QPoint Position)
+Minion_t *MinionManager_t::addMinion(MinionType Type, MinionTeam Team, QPointF Position)
 {
     Minion_t* newMinion;
     switch(Type)
@@ -81,7 +81,7 @@ Minion_t *MinionManager_t::addMinion(MinionType Type, MinionTeam Team, QPoint Po
     }
     newMinion->Team = Team;
     newMinion->Pos = Position;
-    newMinion->Center = newMinion->Pos;
+    newMinion->Center = QPointF(newMinion->Pos.x() + newMinion->pixmap().size().width()/2 , newMinion->Pos.y() + newMinion->pixmap().size().height()/2);
     newMinion->setPos( newMinion->Pos );
     connect(newMinion, SIGNAL(died(Minion_t*)), this, SLOT(receivedMinionDied(Minion_t*)));
     connect(newMinion, SIGNAL(request_FindTarget_Minion(Minion_t*, MinionTeam, Minion_t*&)), this, SLOT(received_FindTarget_Minion(Minion_t*, MinionTeam, Minion_t*&)));
@@ -102,6 +102,7 @@ void MinionManager_t::removeMinion(Minion_t* rmMinion)
 void MinionManager_t::receivedMinionDied(Minion_t *rmMinion)
 {
     emit minionDied(rmMinion);
+    // removeMinion(rmMinion); // not to use this line, BattleManager will call removeMinion to remove this minion
 }
 
 void MinionManager_t::received_FindTarget_Tower(Minion_t *requester, TowerTeam tarTeam, Tower_t *&response)
@@ -125,7 +126,7 @@ DerivedMinion_t::DerivedMinion_t() : Minion_t()
     if( DerivedMinion_t::BasicImage == nullptr ) // construct Pixmaps if they haven't been constructed
     {
         DerivedMinion_t::BasicImage = new QPixmap("./resources/images/DerivedMinion.png");
-        for( int i=1 ; i<=2 ; ++i )
+        for( int i=1 ; i<=0 ; ++i )
         {
             char path[100];
             strcpy(path, "./resources/images/DerivedMinion_move_x.png");
@@ -133,7 +134,7 @@ DerivedMinion_t::DerivedMinion_t() : Minion_t()
             path[len-5] = i + '0';
             DerivedMinion_t::MovingImages.push_back( new QPixmap(path) );
         }
-        for( int i=1 ; i<=2 ; ++i)
+        for( int i=1 ; i<=0 ; ++i)
         {
             char path[100];
             strcpy(path, "./resources/images/DerivedMinion_attack_x.png");

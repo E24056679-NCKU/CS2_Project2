@@ -3,8 +3,9 @@
 
 #include <QObject>
 #include <QGraphicsPixmapItem>
-#include <QPoint>
+#include <QPointF>
 #include <QTimer>
+#include <QList>
 
 #include <QDebug>
 
@@ -28,8 +29,8 @@ class Life_t : public QObject, public QGraphicsPixmapItem
 public:
     Life_t();
     virtual ~Life_t();
-    QPoint Pos;
-    QPoint Center;
+    QPointF Pos;
+    QPointF Center;
     double HP;
     double Damage;
     double Range;

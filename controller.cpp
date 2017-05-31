@@ -10,12 +10,12 @@ ControllerSlot_t::~ControllerSlot_t()
 
 }
 
-void ControllerSlot_t::emit_GotSignal_SelectPosition(QPoint Position)
+void ControllerSlot_t::emit_GotSignal_SelectPosition(QPointF Position)
 {
     emit gotSignal_SelectPosition(Position);
 }
 
-void ControllerSlot_t::emit_GotSignal_SelectMinion(QPoint Position)
+void ControllerSlot_t::emit_GotSignal_SelectMinion(QPointF Position)
 {
     emit gotSignal_SelectMinion(Position);
 }

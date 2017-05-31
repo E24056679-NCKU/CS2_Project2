@@ -31,7 +31,7 @@ class Minion_t : public Life_t
 public:
     Minion_t();
     virtual ~Minion_t();
-    QPoint TargetPosition;
+    QPointF TargetPosition;
     void mousePressEvent(QGraphicsSceneMouseEvent* event);
     bool checkDied();
 
@@ -97,7 +97,7 @@ public:
     ~MinionManager_t();
 
 public slots:
-    Minion_t* addMinion(MinionType Type, MinionTeam Team, QPoint Position);
+    Minion_t* addMinion(MinionType Type, MinionTeam Team, QPointF Position);
     void removeMinion(Minion_t* rmMinion);
     // MinionManager_t has no permission to access Display, so give this event to BattleManager
     void receivedMinionDied(Minion_t* rmMinion);

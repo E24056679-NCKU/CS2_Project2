@@ -27,6 +27,7 @@ public:
     Tower_t();
     ~Tower_t();
     void findTarget_Minion(Tower_t* requester, MinionTeam tarTeam, Minion_t* &response); // response is a reference
+    bool Dead;
 
 signals:
     void died(Tower_t* rmTower);
@@ -49,6 +50,7 @@ public:
 
 public slots:
     void received_FindTarget_Minion(Tower_t* requester, MinionTeam tarTeam, Minion_t* &response);
+    void receivedTowerDied(Tower_t* rmTower);
 
 signals:
     void itemAdded(QGraphicsItem* addItem);

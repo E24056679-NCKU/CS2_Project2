@@ -28,12 +28,12 @@ protected slots:
     void itemRemoved(QGraphicsItem* rmItem);
 
     // incoming signals from controller1
-    void gotSignal1_SelectPosition(QPoint Position);
-    void gotSignal1_SelectMinion(QPoint Position);
+    void gotSignal1_SelectPosition(QPointF Position);
+    void gotSignal1_SelectMinion(QPointF Position);
     void gotSignal1_SelectMinion(Minion_t* selMinion);
     void gotSignal1_SelectCard(int CardID);
-    void gotSignal2_SelectPosition(QPoint Position);
-    void gotSignal2_SelectMinion(QPoint Position);
+    void gotSignal2_SelectPosition(QPointF Position);
+    void gotSignal2_SelectMinion(QPointF Position);
     void gotSignal2_SelectMinion(Minion_t* selMinion);
     void gotSignal2_SelectCard(int CardID);
 

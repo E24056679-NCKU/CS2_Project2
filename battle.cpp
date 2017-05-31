@@ -11,12 +11,16 @@ BattleManager_t::BattleManager_t() : QObject()
     connect(TowerManager, SIGNAL(itemAdded(QGraphicsItem*)), this, SLOT(emit_ItemAdded(QGraphicsItem*)));
     connect(TowerManager, SIGNAL(itemRemoved(QGraphicsItem*)), this, SLOT(emit_ItemRemoved(QGraphicsItem*)));
     connect(TowerManager, SIGNAL(request_FindTarget_Minion(Life_t*,MinionTeam,Minion_t*&)), this, SLOT(findMinionInRange(Life_t*,MinionTeam,Minion_t*&)));
+
+    ArrowManager = new ArrowManager_t();
+    connect(ArrowManager, SIGNAL(itemRemoved(QGraphicsItem*)), this, SLOT(emit_ItemRemoved(QGraphicsItem*)));
 }
 
 BattleManager_t::~BattleManager_t()
 {
     delete MinionManager;
     delete TowerManager;
+    delete ArrowManager;
 }
 
 void BattleManager_t::initialize()
@@ -38,26 +42,18 @@ void BattleManager_t::findMinionInRange(Life_t *requester, MinionTeam tarTeam, M
 {
     response = nullptr;
 
-    int refX, refY;
-    if(requester->LType == LifeType::Minion)
-    {
-        refX = requester->Pos.x();
-        refY = requester->Pos.y();
-    }
-    else
-    {
-        refX = requester->Center.x();
-        refY = requester->Center.y();
-    }
+    double refX, refY;
+    refX = requester->Center.x();
+    refY = requester->Center.y();
 
     for(Minion_t* tar_ptr : this->MinionManager->MinionList)
     {
         if( tar_ptr->Team != tarTeam || tar_ptr == requester )
             continue;
-        int tarX = tar_ptr->Pos.x();
-        int tarY = tar_ptr->Pos.y();
-        int dx = tarX - refX;
-        int dy = tarY - refY;
+        double tarX = tar_ptr->Pos.x();
+        double tarY = tar_ptr->Pos.y();
+        double dx = tarX - refX;
+        double dy = tarY - refY;
         if( dx*dx + dy*dy <= requester->Range * requester->Range )
         {
             response = tar_ptr;
@@ -70,16 +66,16 @@ void BattleManager_t::findTowerInRange(Life_t *requester, TowerTeam tarTeam, Tow
 {
     response = nullptr;
 
-    int refX = requester->Pos.x();
-    int refY = requester->Pos.y();
+    double refX = requester->Pos.x();
+    double refY = requester->Pos.y();
     for(int i=0;i<6;++i)
     {
         Tower_t* tar_ptr = this->TowerManager->TowerList[i];
-        if( tar_ptr->Team != tarTeam || tar_ptr == requester )
+        if( tar_ptr->Team != tarTeam || tar_ptr == requester || tar_ptr->Dead == true )
             continue;
 
-        int tarX[2] = {tar_ptr->Pos.x(), tar_ptr->Pos.x()+100}; // four corner of tower
-        int tarY[2] = {tar_ptr->Pos.y(), tar_ptr->Pos.y()+100};
+        double tarX[2] = {tar_ptr->Pos.x(), tar_ptr->Pos.x()+100}; // four corner of tower
+        double tarY[2] = {tar_ptr->Pos.y(), tar_ptr->Pos.y()+100};
         if(i % 3 == 0) // if tar is main tower
         {
             tarX[1] += 50;
@@ -90,8 +86,8 @@ void BattleManager_t::findTowerInRange(Life_t *requester, TowerTeam tarTeam, Tow
         {
             for(int b=0;b<2;++b)
             {
-                int dx = tarX[a] - refX;
-                int dy = tarY[b] - refY;
+                double dx = tarX[a] - refX;
+                double dy = tarY[b] - refY;
                 if( dx*dx + dy*dy <= requester->Range * requester->Range )
                 {
                     response = tar_ptr;
@@ -102,7 +98,7 @@ void BattleManager_t::findTowerInRange(Life_t *requester, TowerTeam tarTeam, Tow
     }
 }
 
-void BattleManager_t::addMinion(MinionType Type, MinionTeam Group, QPoint Position)
+void BattleManager_t::addMinion(MinionType Type, MinionTeam Group, QPointF Position)
 {
     emit minionAdded(MinionManager->addMinion(Type, Group, Position));
 }
@@ -110,10 +106,11 @@ void BattleManager_t::addMinion(MinionType Type, MinionTeam Group, QPoint Positi
 void BattleManager_t::removeMinion(Minion_t *rmMinion)
 {
     emit minionRemoved(rmMinion);
+    ArrowManager->removeArrowsByTarget(rmMinion); // those arrows which point to rmMinion should be destruct
     MinionManager->removeMinion(rmMinion);
 }
 
-void BattleManager_t::gotSignal1_SelectPosition(QPoint Position)
+void BattleManager_t::gotSignal1_SelectPosition(QPointF Position)
 {
     if(CardSelected_Player1 == -1 && MinionSelected_Player1 != nullptr)
     {
@@ -132,7 +129,7 @@ void BattleManager_t::gotSignal1_SelectPosition(QPoint Position)
     }
 }
 
-void BattleManager_t::gotSignal1_SelectMinion(QPoint Position)
+void BattleManager_t::gotSignal1_SelectMinion(QPointF Position)
 {
     CardSelected_Player1 = -1;
 }
@@ -149,12 +146,12 @@ void BattleManager_t::gotSignal1_SelectCard(int CardID)
     CardSelected_Player1 = CardID;
 }
 
-void BattleManager_t::gotSignal2_SelectPosition(QPoint Position)
+void BattleManager_t::gotSignal2_SelectPosition(QPointF Position)
 {
 
 }
 
-void BattleManager_t::gotSignal2_SelectMinion(QPoint Position)
+void BattleManager_t::gotSignal2_SelectMinion(QPointF Position)
 {
 
 }
