@@ -4,9 +4,12 @@
 #include <QObject>
 #include <QVector>
 #include <QGraphicsPixmapItem>
-#include "minion.h"
+#include "life.h"
 
-typedef MinionTeam TowerTeam;
+typedef LifeTeam TowerTeam;
+typedef LifeTeam MinionTeam;
+
+class Minion_t;
 
 enum TowerType
 {
@@ -14,29 +17,47 @@ enum TowerType
     NormalTower
 };
 
-class Tower_t : public QObject, public QGraphicsPixmapItem
+class Tower_t : public Life_t
 {
+    Q_OBJECT
+
+    friend class TowerManager_t;
+
 public:
     Tower_t();
     ~Tower_t();
+    void findTarget_Minion(Tower_t* requester, MinionTeam tarTeam, Minion_t* &response); // response is a reference
 
 signals:
     void died(Tower_t* rmTower);
+    void request_FindTarget_Minion(Tower_t* requester, MinionTeam tarTeam, Minion_t* &response); // response is a reference
 
 public slots:
-    void attack();
+    void run();
 
 };
 
 class TowerManager_t : public QObject
 {
+    Q_OBJECT
+
+    friend class BattleManager_t;
 public:
     TowerManager_t();
     ~TowerManager_t();
+    void initializeTowers();
 
-    void attack();
+public slots:
+    void received_FindTarget_Minion(Tower_t* requester, MinionTeam tarTeam, Minion_t* &response);
+
+signals:
+    void itemAdded(QGraphicsItem* addItem);
+    void itemRemoved(QGraphicsItem* rmItem);
+    void request_FindTarget_Minion(Life_t* requester, MinionTeam tarTeam, Minion_t* &response); // response is a reference
 
 private:
+    // TL[0] is my main tower; TL[1] is the tower on the left side of TL[0]
+    // TL[3] is my main tower; TL[4] is the tower on the left side of TL[3]
     Tower_t* TowerList[6];
 };
 

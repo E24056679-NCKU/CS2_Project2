@@ -1,22 +1,17 @@
 #ifndef MINION_H
 #define MINION_H
 
-#include <QObject>
 #include <QString>
 #include <QVector>
 #include <QSet>
-#include <QGraphicsPixmapItem>
-#include <QTimer>
-#include <QPoint>
+#include "life.h"
 
 #include <QDebug>
 
-enum MinionTeam
-{
-    MyTeam = 0,
-    OpsTeam, // opponent's group
-    NoTeam // NoTeam can attack other teams, while other teams cannot attack NoTeam
-};
+typedef LifeTeam MinionTeam;
+typedef LifeTeam TowerTeam;
+
+class Tower_t;
 
 enum MinionType
 {
@@ -27,7 +22,7 @@ enum MinionType
 // abstract minion
 // the events of QGraphicsPixmapItem is not implemented in this file
 // they are in Display.cpp because ControllableDisplay needs them
-class Minion_t : public QObject, public QGraphicsPixmapItem
+class Minion_t : public Life_t
 {
     Q_OBJECT
 
@@ -36,28 +31,27 @@ class Minion_t : public QObject, public QGraphicsPixmapItem
 public:
     Minion_t();
     virtual ~Minion_t();
+    QPoint TargetPosition;
     void mousePressEvent(QGraphicsSceneMouseEvent* event);
+    bool checkDied();
+
+    void findTarget_Tower(Minion_t* requester, TowerTeam tarTeam, Tower_t* &response); // response is a reference
+    void findTarget_Minion(Minion_t* requester, MinionTeam tarTeam, Minion_t* &response); // response is a reference
 
 signals:
     void died(Minion_t* rmMinion);
     void selectedByMouse(Minion_t* selMinion);
+    void request_FindTarget_Tower(Minion_t* requester, TowerTeam tarTeam, Tower_t* &response); // response is a reference
+    void request_FindTarget_Minion(Minion_t* requester, MinionTeam tarTeam, Minion_t* &response); // response is a reference
 
 public slots:
-    virtual void run() = 0;
+    virtual void run();
 
 public:
-    virtual void move() = 0;
-    virtual void attack(Minion_t* target) = 0;
-    bool checkDied();
+    virtual void move();
+    virtual void attack(Life_t* target);
 
 protected:
-    QPoint Pos;
-    double HP;
-    double Damage;
-    double Range;
-    double Speed;
-    MinionTeam Group;
-    QTimer* Timer;
 
 private:
 
@@ -79,7 +73,7 @@ public slots:
 
 public:
     void move();
-    void attack(Minion_t* target);
+    void attack(Life_t* target);
     static const MinionType Type = MinionType::DerivedMinion;
 
 protected:
@@ -96,18 +90,24 @@ class MinionManager_t : public QObject
 {
     Q_OBJECT
 
+    friend class BattleManager_t;
+
 public:
     MinionManager_t();
     ~MinionManager_t();
 
 public slots:
-    Minion_t* addMinion(MinionType Type, MinionTeam Group, QPoint Position);
+    Minion_t* addMinion(MinionType Type, MinionTeam Team, QPoint Position);
     void removeMinion(Minion_t* rmMinion);
     // MinionManager_t has no permission to access Display, so give this event to BattleManager
     void receivedMinionDied(Minion_t* rmMinion);
+    void received_FindTarget_Tower(Minion_t* requester, TowerTeam tarTeam, Tower_t* &response);
+    void received_FindTarget_Minion(Minion_t* requester, MinionTeam tarTeam, Minion_t* &response);
 
 signals:
     void minionDied(Minion_t* rmMinion);
+    void request_FindTarget_Tower(Life_t* requester, TowerTeam tarTeam, Tower_t* &response); // response is a reference
+    void request_FindTarget_Minion(Life_t* requester, MinionTeam tarTeam, Minion_t* &response); // response is a reference
 
 protected:
 

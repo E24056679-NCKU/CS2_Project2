@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     battle.cpp \
     display.cpp \
     controller.cpp \
-    tower.cpp
+    tower.cpp \
+    life.cpp
 
 HEADERS  += \
     minion.h \
@@ -26,7 +27,8 @@ HEADERS  += \
     battle.h \
     display.h \
     controller.h \
-    tower.h
+    tower.h \
+    life.h
 
 FORMS    +=
 

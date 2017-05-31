@@ -28,11 +28,16 @@ private:
 
 };
 
+
 class MyQGraphicsScene : public QGraphicsScene
 {
+    Q_OBJECT
+signals:
+    void positionSelected(QPoint Position);
 protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent* event);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
 };
+
 
 class Display_t
 {
@@ -63,6 +68,7 @@ public:
 
 public slots:
     void minionSelected(Minion_t* selMinion);
+    void positionSelected(QPoint Position);
 
 protected:
 

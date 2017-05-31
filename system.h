@@ -21,9 +21,11 @@ public:
     ~System();
 
 protected slots:
-    // minion's
+    // minion must be handle exceptionally because it need to be connected with InputtableDisplay
     void minionAdded(Minion_t* newMinion);
     void minionRemoved(Minion_t* rmMinion);
+    void itemAdded(QGraphicsItem* addItem);
+    void itemRemoved(QGraphicsItem* rmItem);
 
     // incoming signals from controller1
     void gotSignal1_SelectPosition(QPoint Position);

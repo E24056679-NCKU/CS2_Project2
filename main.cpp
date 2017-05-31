@@ -8,5 +8,6 @@ int main(int argc, char *argv[])
     System system(nullptr, nullptr);
     system.BattleManager->addMinion(MinionType::DerivedMinion, MinionTeam::MyTeam, QPoint(400, 300));
 
+
     return prog.exec();
 }
