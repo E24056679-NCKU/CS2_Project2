@@ -26,15 +26,16 @@ class Tower_t : public Life_t
 public:
     Tower_t();
     ~Tower_t();
-    void findTarget_Minion(Tower_t* requester, MinionTeam tarTeam, Minion_t* &response); // response is a reference
+    void findTarget(Life_t* &response); // response is a reference
     bool Dead;
 
 signals:
     void died(Tower_t* rmTower);
-    void request_FindTarget_Minion(Tower_t* requester, MinionTeam tarTeam, Minion_t* &response); // response is a reference
+    void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
 
 public slots:
     void run();
+    void attack(Life_t* target);
 
 };
 
@@ -49,13 +50,15 @@ public:
     void initializeTowers();
 
 public slots:
-    void received_FindTarget_Minion(Tower_t* requester, MinionTeam tarTeam, Minion_t* &response);
     void receivedTowerDied(Tower_t* rmTower);
+    void received_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
+    void receive_arrowAttack(Life_t* target, double damage, QPointF pos);
 
 signals:
     void itemAdded(QGraphicsItem* addItem);
     void itemRemoved(QGraphicsItem* rmItem);
-    void request_FindTarget_Minion(Life_t* requester, MinionTeam tarTeam, Minion_t* &response); // response is a reference
+    void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
+    void emit_arrowAttack(Life_t* target, double damage, QPointF pos);
 
 private:
     // TL[0] is my main tower; TL[1] is the tower on the left side of TL[0]

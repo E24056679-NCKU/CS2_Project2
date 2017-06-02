@@ -1,11 +1,16 @@
 #ifndef BATTLE_H
 #define BATTLE_H
 
+#include <cmath>
+#include <algorithm>
 #include <QPair>
 #include <QObject>
 #include "minion.h"
 #include "tower.h"
 #include "arrow.h"
+
+double distance(const QPointF &a, const QPointF &b);
+double crossProduct(const QPointF &refP, QPointF p1, QPointF p2);
 
 class BattleManager_t : public QObject
 {
@@ -35,8 +40,9 @@ public slots:
     void emit_ItemRemoved(QGraphicsItem* rmItem);
 
     // Note that reponse is a reference
-    void findMinionInRange(Life_t* requester, MinionTeam tarTeam, Minion_t* &response);
-    void findTowerInRange(Life_t* requester, TowerTeam tarTeam, Tower_t* &response);
+    void findLifeInRange(Life_t* requester, LifeTeam tarTeam, Life_t* &response);
+
+    void addArrow(Life_t* target, double damage, QPointF pos);
 
 
 

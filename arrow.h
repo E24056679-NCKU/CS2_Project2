@@ -14,11 +14,10 @@ class Arrow_t : public QObject, public QGraphicsPixmapItem
 public:
     Arrow_t(Life_t *_Target, double _Damage, QPointF _Pos);
     ~Arrow_t();
-    void setTarget(Life_t* Target);
     void selfDestruct();
     double Damage;
     QPointF Pos;
-    static double Speed; // how far an arrow can move in a tick
+    const static double Speed; // how far an arrow can move in a tick
 
 signals:
     void died(Arrow_t* rmArrow);
@@ -51,6 +50,7 @@ public slots:
     void receivedArrowDied(Arrow_t* rmArrow);
 
 signals:
+    void itemAdded(QGraphicsItem* item);
     void itemRemoved(QGraphicsItem* item);
 
 protected:

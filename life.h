@@ -40,9 +40,12 @@ public:
 
 signals:
     void died(Life_t* rmLife);
+    void emit_ArrowAttack(Life_t* target, double damage, QPointF pos);
 
 public slots:
     virtual void run() = 0;
+    virtual void attack(Life_t* target) = 0; // there might be lots of types of attack
+    virtual void arrowAttack(Life_t* target); // simply shoot
 
 public:
     virtual bool checkDied();

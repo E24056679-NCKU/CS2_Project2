@@ -35,14 +35,12 @@ public:
     void mousePressEvent(QGraphicsSceneMouseEvent* event);
     bool checkDied();
 
-    void findTarget_Tower(Minion_t* requester, TowerTeam tarTeam, Tower_t* &response); // response is a reference
-    void findTarget_Minion(Minion_t* requester, MinionTeam tarTeam, Minion_t* &response); // response is a reference
+    virtual void findTarget(Life_t* &response); // response is a reference
 
 signals:
     void died(Minion_t* rmMinion);
     void selectedByMouse(Minion_t* selMinion);
-    void request_FindTarget_Tower(Minion_t* requester, TowerTeam tarTeam, Tower_t* &response); // response is a reference
-    void request_FindTarget_Minion(Minion_t* requester, MinionTeam tarTeam, Minion_t* &response); // response is a reference
+    void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
 
 public slots:
     virtual void run();
@@ -101,13 +99,13 @@ public slots:
     void removeMinion(Minion_t* rmMinion);
     // MinionManager_t has no permission to access Display, so give this event to BattleManager
     void receivedMinionDied(Minion_t* rmMinion);
-    void received_FindTarget_Tower(Minion_t* requester, TowerTeam tarTeam, Tower_t* &response);
-    void received_FindTarget_Minion(Minion_t* requester, MinionTeam tarTeam, Minion_t* &response);
+    void received_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
+    void receive_arrowAttack(Life_t* target, double damage, QPointF pos);
 
 signals:
     void minionDied(Minion_t* rmMinion);
-    void request_FindTarget_Tower(Life_t* requester, TowerTeam tarTeam, Tower_t* &response); // response is a reference
-    void request_FindTarget_Minion(Life_t* requester, MinionTeam tarTeam, Minion_t* &response); // response is a reference
+    void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
+    void emit_arrowAttack(Life_t* target, double damage, QPointF pos);
 
 protected:
 

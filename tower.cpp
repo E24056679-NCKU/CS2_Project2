@@ -13,25 +13,45 @@ Tower_t::~Tower_t()
 
 }
 
-void Tower_t::findTarget_Minion(Tower_t *requester, MinionTeam tarTeam, Minion_t *&response)
+void Tower_t::findTarget(Life_t *&response)
 {
-    emit request_FindTarget_Minion(requester, tarTeam, response);
+    LifeTeam tarTeam;
+    if( this->Team == TowerTeam::MyTeam )
+        tarTeam = LifeTeam::OpsTeam;
+    else if( this->Team == TowerTeam::OpsTeam )
+        tarTeam = LifeTeam::MyTeam;
+
+    //DBG
+    tarTeam = LifeTeam::MyTeam;
+
+    emit request_FindTarget( dynamic_cast<Life_t*>(this) , tarTeam, response);
 }
 
 void Tower_t::run()
 {
-    Minion_t* tar;
-    findTarget_Minion( this, this->Team, tar);
+    // DBG
+    this->Range = 1e9;
+    this->Damage = 1;
 
-    qDebug() << "Reference tower at " << this->Pos;
-    if(tar == nullptr)
+    Life_t* tarLife;
+    findTarget(tarLife);
+
+    // qDebug() << "Reference tower at " << this->Pos;
+    if(tarLife == nullptr)
     {
-        qDebug() << "not found";
+        // qDebug() << "not found";
     }
     else
     {
-        qDebug() << "found " << tar->Pos;
+        // qDebug() << "tower found minion at " << tarLife->Pos;
+        // DBG
+        arrowAttack(tarLife);
     }
+}
+
+void Tower_t::attack(Life_t *target)
+{
+
 }
 
 TowerManager_t::TowerManager_t() : QObject()
@@ -76,15 +96,11 @@ void TowerManager_t::initializeTowers()
         TowerList[i]->setPos(TowerList[i]->Pos);
         TowerList[i]->Range = 100;
         TowerList[i]->Team = TowerTeam::MyTeam;
-        connect(TowerList[i], SIGNAL(request_FindTarget_Minion(Tower_t*,MinionTeam,Minion_t*&)), this, SLOT(received_FindTarget_Minion(Tower_t*,MinionTeam,Minion_t*&)));
+        connect(TowerList[i], SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(received_FindTarget(Life_t*,LifeTeam,Life_t*&)));
         connect(TowerList[i], SIGNAL(died(Tower_t*)), this, SLOT(receivedTowerDied(Tower_t*)));
+        connect(TowerList[i], SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(receive_arrowAttack(Life_t*,double,QPointF)));
         TowerList[i]->Timer->start(1000);
     }
-}
-
-void TowerManager_t::received_FindTarget_Minion(Tower_t *requester, MinionTeam tarTeam, Minion_t *&response)
-{
-    emit request_FindTarget_Minion( dynamic_cast<Life_t*>(requester), tarTeam, response);
 }
 
 void TowerManager_t::receivedTowerDied(Tower_t *rmTower)
@@ -93,4 +109,14 @@ void TowerManager_t::receivedTowerDied(Tower_t *rmTower)
     rmTower->Timer->stop();
     rmTower->Dead = true;
     emit itemRemoved(rmTower);
+}
+
+void TowerManager_t::received_FindTarget(Life_t *requester, LifeTeam tarTeam, Life_t *&response)
+{
+    emit request_FindTarget(requester, tarTeam, response);
+}
+
+void TowerManager_t::receive_arrowAttack(Life_t *target, double damage, QPointF pos)
+{
+    emit emit_arrowAttack(target, damage, pos);
 }
