@@ -46,7 +46,7 @@ public:
     void removeArrowsByTarget(Life_t* Target);
 
 public slots:
-    Arrow_t addArrow(Life_t* Target, double Damage, QPointF Pos);
+    Arrow_t* addArrow(Life_t* Target, double Damage, QPointF Pos);
 
     void receivedArrowDied(Arrow_t* rmArrow);
 

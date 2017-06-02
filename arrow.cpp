@@ -1,7 +1,8 @@
 #include "arrow.h"
 
-Arrow_t::Arrow_t(Life_t *_Target, double _Damage, QPointF _Pos) : QObject(), QGraphicsPixmapItem(), Target(_Target), Damage(_Damage), Pos(_Pos)
+Arrow_t::Arrow_t(Life_t *_Target, double _Damage, QPointF _Pos) : QObject(), QGraphicsPixmapItem(), Damage(_Damage), Pos(_Pos)
 {
+    Target = _Target;
     this->setPixmap( QPixmap("./resources/images/arrow.png") );
     Timer = new QTimer();
     connect(Timer, SIGNAL(timeout()), this, SLOT(timerTick()));
@@ -69,11 +70,12 @@ void ArrowManager_t::removeArrowsByTarget(Life_t *Target)
     }
 }
 
-Arrow_t ArrowManager_t::addArrow(Life_t *Target, double Damage, QPointF Pos)
+Arrow_t* ArrowManager_t::addArrow(Life_t *Target, double Damage, QPointF Pos)
 {
     Arrow_t* newArrow = new Arrow_t(Target, Damage, Pos);
     this->ArrowList.push_back(newArrow);
     connect(newArrow, SIGNAL(died(Arrow_t*)), this, SLOT(receivedArrowDied(Arrow_t*)));
+    return newArrow;
 }
 
 void ArrowManager_t::receivedArrowDied(Arrow_t *rmArrow)
