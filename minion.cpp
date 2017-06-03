@@ -105,8 +105,7 @@ void MinionManager_t::removeMinion(Minion_t* rmMinion)
 
 void MinionManager_t::receivedMinionDied(Minion_t *rmMinion)
 {
-    emit minionDied(rmMinion);
-    // removeMinion(rmMinion); // not to use this line, BattleManager will call removeMinion to remove this minion
+    removeMinion(rmMinion);
 }
 
 void MinionManager_t::received_FindTarget(Life_t *requester, LifeTeam tarTeam, Life_t *&response)
@@ -116,14 +115,14 @@ void MinionManager_t::received_FindTarget(Life_t *requester, LifeTeam tarTeam, L
 
 void MinionManager_t::receive_arrowAttack(Life_t *target, double damage, QPointF pos)
 {
-    emit emit_arrowAttack(target, damage, pos);
+    emit emit_ArrowAttack(target, damage, pos);
 }
 
 
 // DerivedMinion
 QPixmap* DerivedMinion_t::BasicImage = nullptr;
-QVector< QPixmap* > DerivedMinion_t::MovingImages = QVector< QPixmap* >();
-QVector< QPixmap* > DerivedMinion_t::AttackingImages = QVector< QPixmap* >();
+QList< QPixmap* > DerivedMinion_t::MovingImages = QList< QPixmap* >();
+QList< QPixmap* > DerivedMinion_t::AttackingImages = QList< QPixmap* >();
 
 DerivedMinion_t::DerivedMinion_t() : Minion_t()
 {

@@ -6,6 +6,7 @@
 #include <QPointF>
 #include <QTimer>
 #include <QList>
+#include "animation.h"
 
 #include <QDebug>
 

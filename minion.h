@@ -78,8 +78,8 @@ protected:
 
 private:
     static QPixmap* BasicImage;
-    static QVector< QPixmap* > MovingImages;
-    static QVector< QPixmap* > AttackingImages;
+    static QList< QPixmap* > MovingImages;
+    static QList< QPixmap* > AttackingImages;
 };
 
 
@@ -103,9 +103,8 @@ public slots:
     void receive_arrowAttack(Life_t* target, double damage, QPointF pos);
 
 signals:
-    void minionDied(Minion_t* rmMinion);
     void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
-    void emit_arrowAttack(Life_t* target, double damage, QPointF pos);
+    void emit_ArrowAttack(Life_t* target, double damage, QPointF pos);
 
 protected:
 

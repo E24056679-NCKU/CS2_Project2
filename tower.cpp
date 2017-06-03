@@ -118,5 +118,5 @@ void TowerManager_t::received_FindTarget(Life_t *requester, LifeTeam tarTeam, Li
 
 void TowerManager_t::receive_arrowAttack(Life_t *target, double damage, QPointF pos)
 {
-    emit emit_arrowAttack(target, damage, pos);
+    emit emit_ArrowAttack(target, damage, pos);
 }

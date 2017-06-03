@@ -3,26 +3,21 @@
 BattleManager_t::BattleManager_t() : QObject()
 {
     MinionManager = new MinionManager_t();
-    connect(MinionManager, SIGNAL(minionDied(Minion_t*)), this, SLOT(removeMinion(Minion_t*)));
     connect(MinionManager, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(findLifeInRange(Life_t*,LifeTeam,Life_t*&)));
-    connect(MinionManager, SIGNAL(emit_arrowAttack(Life_t*,double,QPointF)), this, SLOT(addArrow(Life_t*,double,QPointF)));
+    connect(MinionManager, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(addArrow(Life_t*,double,QPointF)));
 
     TowerManager = new TowerManager_t();
     connect(TowerManager, SIGNAL(itemAdded(QGraphicsItem*)), this, SLOT(emit_ItemAdded(QGraphicsItem*)));
     connect(TowerManager, SIGNAL(itemRemoved(QGraphicsItem*)), this, SLOT(emit_ItemRemoved(QGraphicsItem*)));
     connect(TowerManager, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(findLifeInRange(Life_t*,LifeTeam,Life_t*&)));
-    connect(TowerManager, SIGNAL(emit_arrowAttack(Life_t*,double,QPointF)), this, SLOT(addArrow(Life_t*,double,QPointF)));
+    connect(TowerManager, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(addArrow(Life_t*,double,QPointF)));
 
-    ArrowManager = new ArrowManager_t();
-    connect(ArrowManager, SIGNAL(itemAdded(QGraphicsItem*)), this, SLOT(emit_ItemAdded(QGraphicsItem*)));
-    connect(ArrowManager, SIGNAL(itemRemoved(QGraphicsItem*)), this, SLOT(emit_ItemRemoved(QGraphicsItem*)));
 }
 
 BattleManager_t::~BattleManager_t()
 {
     delete MinionManager;
     delete TowerManager;
-    delete ArrowManager;
 }
 
 void BattleManager_t::initialize()
@@ -42,18 +37,16 @@ void BattleManager_t::emit_ItemRemoved(QGraphicsItem *rmItem)
 
 void BattleManager_t::addArrow(Life_t *target, double damage, QPointF pos)
 {
-    emit itemAdded( dynamic_cast<QGraphicsItem*>(ArrowManager->addArrow(target, damage, pos)) );
+    itemAdded( dynamic_cast<QGraphicsItem*>(new Arrow_t(target, damage, pos)) );
 }
 
 void BattleManager_t::addMinion(MinionType Type, MinionTeam Group, QPointF Position)
 {
-    emit minionAdded(MinionManager->addMinion(Type, Group, Position));
+    emit_ItemAdded( dynamic_cast<QGraphicsItem*>(MinionManager->addMinion(Type, Group, Position)) );
 }
 
 void BattleManager_t::removeMinion(Minion_t *rmMinion)
 {
-    emit minionRemoved(rmMinion);
-    ArrowManager->removeArrowsByTarget( dynamic_cast<Life_t*>(rmMinion) ); // those arrows which point to rmMinion should be destruct
     MinionManager->removeMinion(rmMinion);
 }
 
@@ -131,7 +124,7 @@ void BattleManager_t::findLifeInRange(Life_t *requester, LifeTeam tarTeam, Life_
     }
 }
 
-void BattleManager_t::gotSignal1_SelectPosition(QPointF Position)
+void BattleManager_t::receivedSignal1_SelectPosition(QPointF Position)
 {
     if(CardSelected_Player1 == -1 && MinionSelected_Player1 != nullptr)
     {
@@ -151,40 +144,31 @@ void BattleManager_t::gotSignal1_SelectPosition(QPointF Position)
     }
 }
 
-void BattleManager_t::gotSignal1_SelectMinion(QPointF Position)
+void BattleManager_t::receivedSignal1_SelectMinion(Minion_t *selMinion)
 {
-    CardSelected_Player1 = -1;
-}
-
-void BattleManager_t::gotSignal1_SelectMinion(Minion_t *selMinion)
-{
+    qDebug() << "BM, sig1, selMini, DBG";
     MinionSelected_Player1 = selMinion;
     CardSelected_Player1 = -1;
 }
 
-void BattleManager_t::gotSignal1_SelectCard(int CardID)
+void BattleManager_t::receivedSignal1_SelectCard(int CardID)
 {
     MinionSelected_Player1 = nullptr;
     CardSelected_Player1 = CardID;
 }
 
-void BattleManager_t::gotSignal2_SelectPosition(QPointF Position)
+void BattleManager_t::receivedSignal2_SelectPosition(QPointF Position)
 {
 
 }
 
-void BattleManager_t::gotSignal2_SelectMinion(QPointF Position)
-{
-
-}
-
-void BattleManager_t::gotSignal2_SelectMinion(Minion_t *selMinion)
+void BattleManager_t::receivedSignal2_SelectMinion(Minion_t *selMinion)
 {
     CardSelected_Player2 = -1;
     MinionSelected_Player2 = selMinion;
 }
 
-void BattleManager_t::gotSignal2_SelectCard(int CardID)
+void BattleManager_t::receivedSignal2_SelectCard(int CardID)
 {
 
 }

@@ -15,17 +15,17 @@ public:
     virtual ~ControllerSlot_t();
 
 protected slots:
-    void emit_GotSignal_SelectPosition(QPointF Position);
-    void emit_GotSignal_SelectMinion(QPointF Position);
-    void emit_GotSignal_SelectMinion(Minion_t* selMinion);
-    void emit_GotSignal_SelectCard(int CardID);
+    void emit_ReceivedSignal_SelectPosition(QPointF Position);
+    //void emit_ReceivedSignal_SelectMinion(QPointF Position);
+    void emit_ReceivedSignal_SelectMinion(Minion_t* selMinion);
+    void emit_ReceivedSignal_SelectCard(int CardID);
 
 signals:
-    void gotSignal_SelectPosition(QPointF Position);
+    void receivedSignal_SelectPosition(QPointF Position);
     // due to technical restriction, use Position to find which Minion is selected
-    void gotSignal_SelectMinion(QPointF Position);
-    void gotSignal_SelectMinion(Minion_t* selMinion);
-    void gotSignal_SelectCard(int CardID); // CardID is 0~3
+    //void receivedSignal_SelectMinion(QPointF Position);
+    void receivedSignal_SelectMinion(Minion_t* selMinion);
+    void receivedSignal_SelectCard(int CardID); // CardID is 0~3
 
 private:
 

@@ -10,22 +10,24 @@ ControllerSlot_t::~ControllerSlot_t()
 
 }
 
-void ControllerSlot_t::emit_GotSignal_SelectPosition(QPointF Position)
+void ControllerSlot_t::emit_ReceivedSignal_SelectPosition(QPointF Position)
 {
-    emit gotSignal_SelectPosition(Position);
+    emit receivedSignal_SelectPosition(Position);
 }
 
-void ControllerSlot_t::emit_GotSignal_SelectMinion(QPointF Position)
+/*
+void ControllerSlot_t::emit_ReceivedSignal_SelectMinion(QPointF Position)
 {
-    emit gotSignal_SelectMinion(Position);
+    emit receivedSignal_SelectMinion(Position);
+}
+*/
+
+void ControllerSlot_t::emit_ReceivedSignal_SelectMinion(Minion_t *selMinion)
+{
+    emit receivedSignal_SelectMinion(selMinion);
 }
 
-void ControllerSlot_t::emit_GotSignal_SelectMinion(Minion_t *selMinion)
+void ControllerSlot_t::emit_ReceivedSignal_SelectCard(int CardID)
 {
-    emit gotSignal_SelectMinion(selMinion);
-}
-
-void ControllerSlot_t::emit_GotSignal_SelectCard(int CardID)
-{
-    emit gotSignal_SelectCard(CardID);
+    emit receivedSignal_SelectCard(CardID);
 }

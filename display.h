@@ -2,6 +2,7 @@
 #define DISPLAY_H
 
 #include <QObject>
+#include <QSet>
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsItem>
@@ -9,6 +10,7 @@
 #include <QPixmap>
 #include <QImage>
 #include <QGraphicsSceneMouseEvent>
+#include "animation.h"
 #include "controller.h"
 #include "minion.h"
 
@@ -58,7 +60,7 @@ private:
 
 };
 
-// ControllerSlot_t (which is QObject) must be inherited first
+// ControllerSlot_t (which is a QObject) must be inherited first
 class ControllableDisplay_t : public ControllerSlot_t, public Display_t
 {
     Q_OBJECT

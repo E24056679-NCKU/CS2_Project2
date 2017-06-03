@@ -20,6 +20,8 @@ Display_t::~Display_t()
 {
     delete Scene;
     delete View;
+    for(int i=0;i<4;++i)
+        delete Button[i];
 }
 
 void Display_t::addItem(QGraphicsItem *Item)
@@ -35,7 +37,7 @@ void Display_t::removeItem(QGraphicsItem *Item)
 ControllableDisplay_t::ControllableDisplay_t()
 {
     for(int i=0;i<4;++i)
-        connect(Button[i], SIGNAL(selectedByMouse(int)), this, SLOT(emit_GotSignal_SelectCard(int)));
+        connect(Button[i], SIGNAL(selectedByMouse(int)), this, SLOT(emit_ReceivedSignal_SelectCard(int)));
     connect(Scene, SIGNAL(positionSelected(QPointF)), this, SLOT(positionSelected(QPointF)));
 }
 
@@ -47,13 +49,13 @@ ControllableDisplay_t::~ControllableDisplay_t()
 void ControllableDisplay_t::minionSelected(Minion_t* selMinion)
 {
     qDebug() << "CD got minSel";
-    emit gotSignal_SelectMinion(selMinion);
+    emit receivedSignal_SelectMinion(selMinion);
 }
 
 void ControllableDisplay_t::positionSelected(QPointF Position)
 {
     qDebug() << "CD got posSel, " << Position.x(), Position.y();
-    emit gotSignal_SelectPosition(Position);
+    emit receivedSignal_SelectPosition(Position);
 }
 
 void Minion_t::mousePressEvent(QGraphicsSceneMouseEvent* event)

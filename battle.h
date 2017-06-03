@@ -21,20 +21,19 @@ public:
     void initialize();
 
 public slots:
+    // these two functions are for user to add/remove minion
     void addMinion(MinionType Type, MinionTeam Group, QPointF Position);
     void removeMinion(Minion_t* rmMinion);
 
     // incoming signals from controller1
-    void gotSignal1_SelectPosition(QPointF Position);
-    void gotSignal1_SelectMinion(QPointF Position);
-    void gotSignal1_SelectMinion(Minion_t* selMinion);
-    void gotSignal1_SelectCard(int CardID);
+    void receivedSignal1_SelectPosition(QPointF Position);
+    void receivedSignal1_SelectMinion(Minion_t* selMinion);
+    void receivedSignal1_SelectCard(int CardID);
     // incoming signals from controller2
-    // !! not implemented yet
-    void gotSignal2_SelectPosition(QPointF Position);
-    void gotSignal2_SelectMinion(QPointF Position);
-    void gotSignal2_SelectMinion(Minion_t* selMinion);
-    void gotSignal2_SelectCard(int CardID);
+    // !! not been implemented yet
+    void receivedSignal2_SelectPosition(QPointF Position);
+    void receivedSignal2_SelectMinion(Minion_t* selMinion);
+    void receivedSignal2_SelectCard(int CardID);
 
     void emit_ItemAdded(QGraphicsItem* addItem);
     void emit_ItemRemoved(QGraphicsItem* rmItem);
@@ -47,8 +46,6 @@ public slots:
 
 
 signals:
-    void minionAdded(Minion_t* newMinion);
-    void minionRemoved(Minion_t* rmMinion);
     void itemAdded(QGraphicsItem* addItem);
     void itemRemoved(QGraphicsItem* rmItem);
 
@@ -56,7 +53,6 @@ signals:
 protected:
     MinionManager_t* MinionManager;
     TowerManager_t* TowerManager;
-    ArrowManager_t* ArrowManager;
 
 
     int CardSelected_Player1; // default (no selected) = -1

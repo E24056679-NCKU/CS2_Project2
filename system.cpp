@@ -15,20 +15,14 @@ System::System(ControllerSlot_t* Controller1 = nullptr, ControllerSlot_t* Contro
         ControllerSlot[0] = Controller1;
     }
     // connect Controller
-    connect(ControllerSlot[0], SIGNAL(gotSignal_SelectCard(int)), this, SLOT(gotSignal1_SelectCard(int)));
-    connect(ControllerSlot[0], SIGNAL(gotSignal_SelectMinion(Minion_t*)), this, SLOT(gotSignal1_SelectMinion(Minion_t*)));
-    connect(ControllerSlot[0], SIGNAL(gotSignal_SelectMinion(QPointF)), this, SLOT(gotSignal1_SelectMinion(QPointF)));
-    connect(ControllerSlot[0], SIGNAL(gotSignal_SelectPosition(QPointF)), this, SLOT(gotSignal1_SelectPosition(QPointF)));
+    connect(ControllerSlot[0], SIGNAL(receivedSignal_SelectCard(int)), this, SLOT(receivedSignal1_SelectCard(int)));
+    connect(ControllerSlot[0], SIGNAL(receivedSignal_SelectMinion(Minion_t*)), this, SLOT(receivedSignal1_SelectMinion(Minion_t*)));
+    //connect(ControllerSlot[0], SIGNAL(receivedSignal_SelectMinion(QPointF)), this, SLOT(receivedSignal1_SelectMinion(QPointF)));
+    connect(ControllerSlot[0], SIGNAL(receivedSignal_SelectPosition(QPointF)), this, SLOT(receivedSignal1_SelectPosition(QPointF)));
 
     if(Controller2 == nullptr)
     {
-        /*
-        AIController = new AIController_t;
-        connect(Controller2, SIGNAL(gotSignal_SelectCard(int)), this, SLOT(gotSignal2_SelectCard(int)));
-        connect(Controller2, SIGNAL(gotSignal_SelectMinion(Minion_t*)), this, SLOT(gotSignal2_SelectMinion(Minion_t*)));
-        connect(Controller2, SIGNAL(gotSignal_SelectMinion(QPointF)), this, SLOT(gotSignal2_SelectMinion(QPointF)));
-        connect(Controller2, SIGNAL(gotSignal_SelectPosition(QPointF)), this, SLOT(gotSignal2_SelectPosition(QPointF)));
-        */
+
     }
     else
     {
@@ -36,50 +30,41 @@ System::System(ControllerSlot_t* Controller1 = nullptr, ControllerSlot_t* Contro
     }
     // connect controller
     /*
-    connect(ControllerSlot[1], SIGNAL(gotSignal_SelectCard(int)), this, SLOT(gotSignal1_SelectCard(int)));
-    connect(ControllerSlot[1], SIGNAL(gotSignal_SelectMinion(Minion_t*)), this, SLOT(gotSignal1_SelectMinion(Minion_t*)));
-    connect(ControllerSlot[1], SIGNAL(gotSignal_SelectMinion(QPointF)), this, SLOT(gotSignal1_SelectMinion(QPointF)));
-    connect(ControllerSlot[1], SIGNAL(gotSignal_SelectPosition(QPointF)), this, SLOT(gotSignal1_SelectPosition(QPointF)));
+    connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectCard(int)), this, SLOT(receivedSignal1_SelectCard(int)));
+    connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectMinion(Minion_t*)), this, SLOT(receivedSignal1_SelectMinion(Minion_t*)));
+    // connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectMinion(QPointF)), this, SLOT(receivedSignal1_SelectMinion(QPointF)));
+    connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectPosition(QPointF)), this, SLOT(receivedSignal1_SelectPosition(QPointF)));
     */
 
     // connect ...
 
 
     BattleManager = new BattleManager_t();
-    connect(BattleManager, SIGNAL(minionAdded(Minion_t*)), this, SLOT(minionAdded(Minion_t*)));
-    connect(BattleManager, SIGNAL(minionRemoved(Minion_t*)), this, SLOT(minionRemoved(Minion_t*)));
     connect(BattleManager, SIGNAL(itemAdded(QGraphicsItem*)), this, SLOT(itemAdded(QGraphicsItem*)));
     connect(BattleManager, SIGNAL(itemRemoved(QGraphicsItem*)), this, SLOT(itemRemoved(QGraphicsItem*)));
     // not until now can item created by BattleManager be added to scene
-    BattleManager->initialize(); // for initialize towers
+    BattleManager->initialize(); // for initializing towers
 }
 
 System::~System()
 {
     delete BattleManager;
     delete Display;
-    // ControllerSlot[] is not built in this class, it shouldn't be delete here
-}
-
-void System::minionAdded(Minion_t *newMinion)
-{
-    Display->addItem( dynamic_cast<QGraphicsItem*>(newMinion) );
-
-    // connect minion with ControllableDisplay
-    if( ControllableDisplay != nullptr )
-    {
-        connect(newMinion, SIGNAL(selectedByMouse(Minion_t*)), ControllableDisplay, SLOT(emit_GotSignal_SelectMinion(Minion_t*)));
-    }
-}
-
-void System::minionRemoved(Minion_t *rmMinion)
-{
-    Display->removeItem( dynamic_cast<QGraphicsItem*>(rmMinion) );
+    // ControllerSlot[] is not built in this class, it shouldn't be deleted here
 }
 
 void System::itemAdded(QGraphicsItem *addItem)
 {
     Display->addItem( addItem );
+
+    // if addItem is a Minion_t, connect it with ControllableDisplay
+    if( ControllableDisplay != nullptr )
+    {
+        Minion_t* newMinion = dynamic_cast<Minion_t*>(addItem);
+        if( newMinion != nullptr)
+            connect(newMinion, SIGNAL(selectedByMouse(Minion_t*)), ControllableDisplay, SLOT(emit_ReceivedSignal_SelectMinion(Minion_t*)));
+    }
+
 }
 
 void System::itemRemoved(QGraphicsItem *rmItem)
@@ -87,42 +72,32 @@ void System::itemRemoved(QGraphicsItem *rmItem)
     Display->removeItem( rmItem );
 }
 
-void System::gotSignal1_SelectPosition(QPointF Position)
+void System::receivedSignal1_SelectPosition(QPointF Position)
 {
-    BattleManager->gotSignal1_SelectPosition(Position);
+    BattleManager->receivedSignal1_SelectPosition(Position);
 }
 
-void System::gotSignal1_SelectMinion(QPointF Position)
+void System::receivedSignal1_SelectMinion(Minion_t *selMinion)
 {
-    BattleManager->gotSignal1_SelectMinion(Position);
+    BattleManager->receivedSignal1_SelectMinion(selMinion);
 }
 
-void System::gotSignal1_SelectMinion(Minion_t *selMinion)
+void System::receivedSignal1_SelectCard(int CardID)
 {
-    BattleManager->gotSignal1_SelectMinion(selMinion);
+    BattleManager->receivedSignal1_SelectCard(CardID);
 }
 
-void System::gotSignal1_SelectCard(int CardID)
+void System::receivedSignal2_SelectPosition(QPointF Position)
 {
-    BattleManager->gotSignal1_SelectCard(CardID);
+    BattleManager->receivedSignal2_SelectPosition(Position);
 }
 
-void System::gotSignal2_SelectPosition(QPointF Position)
+void System::receivedSignal2_SelectMinion(Minion_t *selMinion)
 {
-    BattleManager->gotSignal2_SelectPosition(Position);
+    BattleManager->receivedSignal2_SelectMinion(selMinion);
 }
 
-void System::gotSignal2_SelectMinion(QPointF Position)
+void System::receivedSignal2_SelectCard(int CardID)
 {
-    BattleManager->gotSignal2_SelectMinion(Position);
-}
-
-void System::gotSignal2_SelectMinion(Minion_t *selMinion)
-{
-    BattleManager->gotSignal2_SelectMinion(selMinion);
-}
-
-void System::gotSignal2_SelectCard(int CardID)
-{
-    BattleManager->gotSignal2_SelectCard(CardID);
+    BattleManager->receivedSignal2_SelectCard(CardID);
 }

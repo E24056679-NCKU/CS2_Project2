@@ -58,7 +58,7 @@ signals:
     void itemAdded(QGraphicsItem* addItem);
     void itemRemoved(QGraphicsItem* rmItem);
     void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
-    void emit_arrowAttack(Life_t* target, double damage, QPointF pos);
+    void emit_ArrowAttack(Life_t* target, double damage, QPointF pos);
 
 private:
     // TL[0] is my main tower; TL[1] is the tower on the left side of TL[0]
