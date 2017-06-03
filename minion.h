@@ -33,9 +33,10 @@ public:
     virtual ~Minion_t();
     QPointF TargetPosition;
     void mousePressEvent(QGraphicsSceneMouseEvent* event);
-    bool checkDied();
 
     virtual void findTarget(Life_t* &response); // response is a reference
+
+    bool checkDied();
 
 signals:
     void died(Minion_t* rmMinion);

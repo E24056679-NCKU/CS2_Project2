@@ -8,7 +8,6 @@ BattleManager_t::BattleManager_t() : QObject()
 
     TowerManager = new TowerManager_t();
     connect(TowerManager, SIGNAL(itemAdded(QGraphicsItem*)), this, SLOT(emit_ItemAdded(QGraphicsItem*)));
-    connect(TowerManager, SIGNAL(itemRemoved(QGraphicsItem*)), this, SLOT(emit_ItemRemoved(QGraphicsItem*)));
     connect(TowerManager, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(findLifeInRange(Life_t*,LifeTeam,Life_t*&)));
     connect(TowerManager, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(addArrow(Life_t*,double,QPointF)));
 
@@ -77,7 +76,7 @@ void BattleManager_t::findLifeInRange(Life_t *requester, LifeTeam tarTeam, Life_
             break;
 
         Tower_t* tar_ptr = this->TowerManager->TowerList[i];
-        if( tar_ptr->Team != tarTeam || tar_ptr == requester || tar_ptr->Dead == true )
+        if( tar_ptr == nullptr || tar_ptr->Team != tarTeam || tar_ptr == requester )
             continue;
 
         double tarHeight = tar_ptr->pixmap().size().height();

@@ -27,7 +27,8 @@ public:
     Tower_t();
     ~Tower_t();
     void findTarget(Life_t* &response); // response is a reference
-    bool Dead;
+
+    bool checkDied();
 
 signals:
     void died(Tower_t* rmTower);
@@ -56,7 +57,6 @@ public slots:
 
 signals:
     void itemAdded(QGraphicsItem* addItem);
-    void itemRemoved(QGraphicsItem* rmItem);
     void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
     void emit_ArrowAttack(Life_t* target, double damage, QPointF pos);
 
@@ -64,6 +64,7 @@ private:
     // TL[0] is my main tower; TL[1] is the tower on the left side of TL[0]
     // TL[3] is my main tower; TL[4] is the tower on the left side of TL[3]
     Tower_t* TowerList[6];
+    // if Tower[i] died , TowerList[i] will be changed to nullptr
 };
 
 #endif // TOWER_H

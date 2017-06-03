@@ -148,7 +148,7 @@ DerivedMinion_t::DerivedMinion_t() : Minion_t()
     }
     this->setPixmap( * (this->BasicImage) );
 
-    // DEBUG
+    // DBG
     this->Range = 50;
     this->HP = 50;
 
@@ -164,6 +164,11 @@ void DerivedMinion_t::run()
 {
     if(this->checkDied())
         return;
+
+    qDebug() << "minion hp" << this->HP;
+
+    //DBG
+    this->Damage = 1;
 
     Life_t* tarLife;
     findTarget(tarLife);
@@ -185,7 +190,7 @@ void DerivedMinion_t::run()
         {
             qDebug() << "found Tower at " << tarLife->Pos;
             // DBG
-            //arrowAttack(tarLife);
+            arrowAttack(tarLife);
         }
     }
 }

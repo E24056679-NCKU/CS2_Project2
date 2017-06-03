@@ -49,7 +49,7 @@ public slots:
     virtual void arrowAttack(Life_t* target); // simply shoot
 
 public:
-    virtual bool checkDied();
+    virtual bool checkDied() = 0;
 
 protected:
     QTimer* Timer;

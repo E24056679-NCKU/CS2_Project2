@@ -5,7 +5,9 @@ Tower_t::Tower_t() : Life_t()
 {
     this->setZValue(-1);
     this->LType = LifeType::Tower;
-    this->Dead = false;
+
+    //DBG
+    this->HP = 10;
 }
 
 Tower_t::~Tower_t()
@@ -27,10 +29,26 @@ void Tower_t::findTarget(Life_t *&response)
     emit request_FindTarget( dynamic_cast<Life_t*>(this) , tarTeam, response);
 }
 
+bool Tower_t::checkDied()
+{
+    if(this->HP <= 0)
+    {
+        emit died(this);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void Tower_t::run()
 {
+    if(this->checkDied())
+        return;
+
     // DBG
-    this->Range = 1e9;
+    this->Range = 300;
     this->Damage = 1;
 
     Life_t* tarLife;
@@ -62,7 +80,8 @@ TowerManager_t::TowerManager_t() : QObject()
 TowerManager_t::~TowerManager_t()
 {
     for(int i=0;i<6;++i)
-        delete TowerList[i];
+        if(TowerList[i] != nullptr)
+            delete TowerList[i];
 }
 
 void TowerManager_t::initializeTowers()
@@ -105,10 +124,10 @@ void TowerManager_t::initializeTowers()
 
 void TowerManager_t::receivedTowerDied(Tower_t *rmTower)
 {
-    // !!!! not to delete rmTower now, they should be delete when TowerManager is destructed
-    rmTower->Timer->stop();
-    rmTower->Dead = true;
-    emit itemRemoved(rmTower);
+    for(int i=0;i<6;++i)
+        if( TowerList[i] == rmTower )
+            TowerList[i] = nullptr;
+    delete rmTower;
 }
 
 void TowerManager_t::received_FindTarget(Life_t *requester, LifeTeam tarTeam, Life_t *&response)

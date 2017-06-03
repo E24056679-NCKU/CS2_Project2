@@ -17,6 +17,7 @@ void Life_t::arrowAttack(Life_t *target)
     emit emit_ArrowAttack(target, this->Damage, this->Center);
 }
 
+/*
 bool Life_t::checkDied()
 {
     if(this->HP <= 0)
@@ -30,3 +31,4 @@ bool Life_t::checkDied()
         return false;
     }
 }
+*/
