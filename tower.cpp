@@ -5,6 +5,7 @@ Tower_t::Tower_t() : Life_t()
 {
     this->setZValue(-1);
     this->LType = LifeType::Tower;
+    this->setEnabled(0);
 
     //DBG
     this->HP = 10;

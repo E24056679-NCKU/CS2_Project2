@@ -4,7 +4,8 @@
 Display_t::Display_t()
 {
     Scene = new MyQGraphicsScene();
-    Scene->setSceneRect(0, 0, 800, 600);
+    //Scene->setSceneRect(0, 0, 800, 600);
+    Scene->setSceneRect(-800, -600, 2400, 1800);
     View = new QGraphicsView(Scene);
     View->show();
 
@@ -81,10 +82,55 @@ void Button_t::mousePressEvent(QGraphicsSceneMouseEvent *event)
     emit selectedByMouse(ID);
 }
 
+MyQGraphicsScene::MyQGraphicsScene()
+{
+    Timer = new QTimer;
+    connect(Timer, SIGNAL(timeout()), this, SLOT(updateBlackScreen()));
+    BlackScreen = new QImage(800, 600, QImage::Format_ARGB32);
+    BlackScreen->fill(QColor(0, 0, 0));
+    BlackScreenItem = new QGraphicsPixmapItem( QPixmap::fromImage(*BlackScreen) );
+    BlackScreenItem->setZValue(0.9);
+    BlackScreenItem->setPos(0, 0);
+    this->addItem(BlackScreenItem);
+    Timer->start(50); // 20Hz
+}
+
+MyQGraphicsScene::~MyQGraphicsScene()
+{
+    delete BlackScreen;
+}
+
+void MyQGraphicsScene::updateBlackScreen()
+{
+    BlackScreen->fill(QColor(0, 0, 0, 255)); // completely black
+    for(auto &item_ptr : QGraphicsScene::items())
+    {
+        Minion_t* minion = dynamic_cast<Minion_t*>(item_ptr);
+        if(minion != nullptr && minion->Team == MinionTeam::MyTeam)
+        {
+            int lb = std::max(0.0, minion->Center.x() - 100); // left bound
+            int rb = std::min(799.0, minion->Center.x() + 100); // right
+            int ub = std::max(0.0, minion->Center.y() - 100); // up
+            int db = std::min(599.0, minion->Center.y() + 100); // down
+
+            for(int i=lb;i<=rb;++i)
+            {
+                for(int j=ub;j<=db;++j)
+                {
+                    BlackScreen->setPixelColor(i, j, QColor(255, 255, 255, 0)); // transparent
+                }
+            }
+        }
+    }
+    BlackScreenItem->setPixmap( QPixmap::fromImage(*BlackScreen) );
+}
+
 void MyQGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     QPointF pos = event->scenePos().toPoint();
-    if( QGraphicsScene::items(pos).size() == 0 )
+    qDebug() << "scene received event , pos = " << pos ;
+    qDebug() << "scene items size = " << QGraphicsScene::items(pos).size();
+    if( QGraphicsScene::items(pos).size() <= 1 )
     {
         emit positionSelected(pos);
         return;

@@ -165,8 +165,6 @@ void DerivedMinion_t::run()
     if(this->checkDied())
         return;
 
-    qDebug() << "minion hp" << this->HP;
-
     //DBG
     this->Damage = 1;
 
@@ -182,13 +180,11 @@ void DerivedMinion_t::run()
     {
         if( dynamic_cast<Minion_t*>(tarLife) )
         {
-            qDebug() << "found Minion at " << tarLife->Pos;
             // DBG
             //arrowAttack(tarLife);
         }
         else if( dynamic_cast<Tower_t*>(tarLife) )
         {
-            qDebug() << "found Tower at " << tarLife->Pos;
             // DBG
             arrowAttack(tarLife);
         }

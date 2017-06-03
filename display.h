@@ -1,6 +1,7 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+#include <algorithm>
 #include <QObject>
 #include <QSet>
 #include <QGraphicsView>
@@ -12,6 +13,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include "animation.h"
 #include "controller.h"
+#include "life.h"
 #include "minion.h"
 
 class Button_t : public QObject, public QGraphicsPixmapItem
@@ -31,13 +33,25 @@ private:
 };
 
 
+// for BlackScreen and override mousePressEvent
 class MyQGraphicsScene : public QGraphicsScene
 {
     Q_OBJECT
+public:
+    MyQGraphicsScene();
+    ~MyQGraphicsScene();
+
+public slots:
+    void updateBlackScreen();
+
 signals:
     void positionSelected(QPointF Position);
+
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
+    QImage* BlackScreen;
+    QGraphicsPixmapItem* BlackScreenItem;
+    QTimer* Timer; // for updating BlackScreen
 };
 
 
