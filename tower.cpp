@@ -38,17 +38,22 @@ void Tower_t::run()
     this->Range = 300;
     this->Damage = 1;
 
+    /*
     Life_t* tarLife;
     findTarget(tarLife);
+    */
+    QList<Life_t*> tarLifeList;
+    findAllTarget(tarLifeList);
 
-    if(tarLife == nullptr)
+    if( tarLifeList.empty() ) // no life in range
     {
 
     }
     else
     {
         // DBG
-        attack(tarLife);
+        for( auto &i : tarLifeList )
+            attack(i);
     }
 }
 
@@ -104,6 +109,7 @@ void TowerManager_t::initializeTowers()
         else
             TowerList[i]->Team = TowerTeam::OpsTeam;
         connect(TowerList[i], SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(received_FindTarget(Life_t*,LifeTeam,Life_t*&)));
+        connect(TowerList[i], SIGNAL(request_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&)), this, SLOT(received_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&)));
         connect(TowerList[i], SIGNAL(died(Tower_t*)), this, SLOT(receivedTowerDied(Tower_t*)));
         connect(TowerList[i], SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(receive_arrowAttack(Life_t*,double,QPointF)));
         TowerList[i]->Timer->start(1000 / TowerList[i]->Hz);
@@ -121,6 +127,11 @@ void TowerManager_t::receivedTowerDied(Tower_t *rmTower)
 void TowerManager_t::received_FindTarget(Life_t *requester, LifeTeam tarTeam, Life_t *&response)
 {
     emit request_FindTarget(requester, tarTeam, response);
+}
+
+void TowerManager_t::received_FindAllTarget(Life_t *requester, LifeTeam tarTeam, QList<Life_t *> &response)
+{
+    emit request_FindAllTarget(requester, tarTeam, response);
 }
 
 void TowerManager_t::receive_arrowAttack(Life_t *target, double damage, QPointF pos)

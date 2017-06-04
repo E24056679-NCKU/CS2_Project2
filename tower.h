@@ -52,11 +52,13 @@ public:
 public slots:
     void receivedTowerDied(Tower_t* rmTower);
     void received_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
+    void received_FindAllTarget(Life_t* requester, LifeTeam tarTeam, QList<Life_t*> &response);
     void receive_arrowAttack(Life_t* target, double damage, QPointF pos);
 
 signals:
     void itemAdded(QGraphicsItem* addItem);
     void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
+    void request_FindAllTarget(Life_t* requester, LifeTeam tarTeam, QList<Life_t*> &response);
     void emit_ArrowAttack(Life_t* target, double damage, QPointF pos);
 
 private:

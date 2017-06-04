@@ -153,7 +153,12 @@ void MyQGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
     QPointF pos = event->scenePos().toPoint();
     qDebug() << "scene received event , pos = " << pos ;
     qDebug() << "scene items size = " << QGraphicsScene::items(pos).size();
-    if( QGraphicsScene::items(pos).size() <= 1 )
+    if( QGraphicsScene::items(pos).size() == 0 )
+    {
+        emit positionSelected(pos);
+        return;
+    }
+    if( QGraphicsScene::items(pos).size() == 1 && QGraphicsScene::items(pos)[0] == BlackScreenItem )
     {
         emit positionSelected(pos);
         return;

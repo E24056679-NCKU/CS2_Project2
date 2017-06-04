@@ -41,6 +41,7 @@ public slots:
     // find one Life in requester's Range, the response is not necessarily be the closest one to requester
     // Note that reponse is a reference
     void findLifeInRange(Life_t* requester, LifeTeam tarTeam, Life_t* &response);
+    void findAllLifeInRange(Life_t* requester, LifeTeam tarTeam, QList<Life_t*> &response);
 
     // create an arrow, then itemAdd() it
     void addArrow(Life_t* target, double damage, QPointF pos);

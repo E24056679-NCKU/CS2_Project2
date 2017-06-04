@@ -46,6 +46,7 @@ signals:
     void emit_ArrowAttack(Life_t* target, double damage, QPointF pos);
     // send to Manager, then Manager forward it to BattleManager
     void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
+    void request_FindAllTarget(Life_t* requester, LifeTeam tarTeam, QList<Life_t*> &response);
 
 public slots:
     // run is connected to Timer::timeout
@@ -57,6 +58,8 @@ public slots:
 
     // Note that reponse is a reference
     virtual void findTarget(Life_t* &response); // response is a reference
+    // find all target in range
+    virtual void findAllTarget(QList<Life_t*> &response);
 
 public:
     // check whether a life died

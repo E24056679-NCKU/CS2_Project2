@@ -4,6 +4,7 @@ BattleManager_t::BattleManager_t() : QObject()
 {
     MinionManager = new MinionManager_t();
     connect(MinionManager, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(findLifeInRange(Life_t*,LifeTeam,Life_t*&)));
+    connect(MinionManager, SIGNAL(request_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&)), this, SLOT(findAllLifeInRange(Life_t*,LifeTeam,QList<Life_t*>&)));
     connect(MinionManager, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(addArrow(Life_t*,double,QPointF)));
     connect(MinionManager, SIGNAL(request_Animation(QPointF,int,QList<QString>&)), this, SLOT(received_Animation(QPointF,int,QList<QString>&)));
     connect(MinionManager, SIGNAL(request_RangeAttack(Life_t*,QPointF,double,double,LifeTeam)), this, SLOT(rangeAttack(Life_t*,QPointF,double,double,LifeTeam)));
@@ -11,6 +12,7 @@ BattleManager_t::BattleManager_t() : QObject()
     TowerManager = new TowerManager_t();
     connect(TowerManager, SIGNAL(itemAdded(QGraphicsItem*)), this, SLOT(emit_ItemAdded(QGraphicsItem*)));
     connect(TowerManager, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(findLifeInRange(Life_t*,LifeTeam,Life_t*&)));
+    connect(TowerManager, SIGNAL(request_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&)), this, SLOT(findAllLifeInRange(Life_t*,LifeTeam,QList<Life_t*>&)));
     connect(TowerManager, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(addArrow(Life_t*,double,QPointF)));
 
 }
@@ -180,6 +182,66 @@ void BattleManager_t::findLifeInRange(Life_t *requester, LifeTeam tarTeam, Life_
             return;
         }
     }
+}
+
+void BattleManager_t::findAllLifeInRange(Life_t *requester, LifeTeam tarTeam, QList<Life_t*> &response)
+{
+        response.clear();
+
+        const QPointF& refPos = requester->Center;
+
+        // for each tower
+        for(int i=0;i<6;++i)
+        {
+            if( dynamic_cast<Tower_t*>(requester) != nullptr ) // if the requester is tower, leave this loop
+                break;
+
+            Tower_t* tar_ptr = this->TowerManager->TowerList[i];
+            if( tar_ptr == nullptr || tar_ptr->Team != tarTeam || tar_ptr == requester )
+                continue;
+
+            double tarHeight = tar_ptr->pixmap().size().height();
+            double tarWidth = tar_ptr->pixmap().size().width();
+            if( tar_ptr->Range + std::sqrt(tarHeight*tarHeight+tarWidth*tarWidth)/2 < distance(tar_ptr->Center, refPos) ) // obviously impossible in range, this line aims to prevent the following commands from being executed
+                continue;
+
+            double tarX[2] = {tar_ptr->Center.x() - tarWidth/2  ,  tar_ptr->Center.x() + tarWidth/2}; // four corner of tower
+            double tarY[2] = {tar_ptr->Center.y() - tarHeight/2  ,  tar_ptr->Center.y() + tarHeight/2}; // four corner of tower
+            QPointF tarCorner[4];
+            for(int a=0;a<2;++a) // create four points for four corner
+                for(int b=0;b<2;++b)
+                    tarCorner[a*2 + b] = QPointF(tarX[a], tarY[b]);
+
+            double minDist = 1e9; // minimum distance between tower and minion
+            // for each cornor; minimum dist may be dist(corner, point) or dist(line, point)
+            for(int i=0;i<4;++i)
+            {
+                minDist = std::min(minDist, distance(refPos, tarCorner[i]));
+
+                if( crossProduct(refPos, tarCorner[i], tarCorner[(i+1)%4]) > 0   &&   crossProduct(refPos, tarCorner[(i+1)%4], tarCorner[i]) < 0 ) // % 4 is to change 4 to 0
+                    minDist = std::min(minDist, fabs( crossProduct(refPos, tarCorner[i], tarCorner[(i+1)%4]) ) / distance(tarCorner[i], tarCorner[(i+1)%4]) ); // use the area of triangle to calculate distance to line
+
+                if( minDist <= requester->Range )
+                {
+                    response.push_back( dynamic_cast<Life_t*>(tar_ptr) );
+                    break;
+                }
+            }
+        }
+
+        // then each minion
+        for(Minion_t* tar_ptr : this->MinionManager->MinionList)
+        {
+            if( tar_ptr->Team != tarTeam || tar_ptr == requester )
+                continue;
+
+            const QPointF& tarPos = tar_ptr->Center;
+            if( distance(refPos, tarPos) <= requester->Range )
+            {
+                response.push_back( dynamic_cast<Life_t*>(tar_ptr) );
+                continue;
+            }
+        }
 }
 
 void BattleManager_t::receivedSignal1_SelectPosition(QPointF Position)

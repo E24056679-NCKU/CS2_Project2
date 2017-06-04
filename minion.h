@@ -106,6 +106,7 @@ public slots:
     void receivedMinionDied(Minion_t* rmMinion);
     // received signal Life::findtarget()
     void received_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
+    void received_FindAllTarget(Life_t* requester, LifeTeam tarTeam, QList<Life_t*> &response);
     // received signal Life::emit_ArrowAttack()
     void receive_ArrowAttack(Life_t* target, double damage, QPointF pos);
     // received signal Minion::request_Animation
@@ -116,6 +117,7 @@ public slots:
 signals:
     // forward signal to BattleManager
     void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
+    void request_FindAllTarget(Life_t* requester, LifeTeam tarTeam, QList<Life_t*> &response);
     void emit_ArrowAttack(Life_t* target, double damage, QPointF pos);
     void request_Animation(QPointF center, int ms, QList<QString> &pathList);
     void request_RangeAttack(Life_t* requester, QPointF center, double range, double damage, LifeTeam targetTeam);
