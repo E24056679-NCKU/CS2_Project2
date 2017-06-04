@@ -43,6 +43,7 @@ signals:
     void selectedByMouse(Minion_t* selMinion);
     // ask system to create a Animation
     void request_Animation(QPointF center, int ms, QList<QString> &pathList);
+    void request_RangeAttack(Life_t* requester, QPointF center, double range, double damage, LifeTeam targetTeam);
 
 public slots:
     virtual void run();
@@ -106,15 +107,18 @@ public slots:
     // received signal Life::findtarget()
     void received_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
     // received signal Life::emit_ArrowAttack()
-    void receive_arrowAttack(Life_t* target, double damage, QPointF pos);
+    void receive_ArrowAttack(Life_t* target, double damage, QPointF pos);
     // received signal Minion::request_Animation
     void received_Animation(QPointF center, int ms, QList<QString> &pathList);
+    // received signal Minion::request_RangeAttack
+    void received_RangeAttack(Life_t* requester, QPointF center, double range, double damage, LifeTeam targetTeam);
 
 signals:
     // forward signal to BattleManager
     void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
     void emit_ArrowAttack(Life_t* target, double damage, QPointF pos);
     void request_Animation(QPointF center, int ms, QList<QString> &pathList);
+    void request_RangeAttack(Life_t* requester, QPointF center, double range, double damage, LifeTeam targetTeam);
 
 protected:
 

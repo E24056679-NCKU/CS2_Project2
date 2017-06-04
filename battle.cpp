@@ -6,6 +6,7 @@ BattleManager_t::BattleManager_t() : QObject()
     connect(MinionManager, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(findLifeInRange(Life_t*,LifeTeam,Life_t*&)));
     connect(MinionManager, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(addArrow(Life_t*,double,QPointF)));
     connect(MinionManager, SIGNAL(request_Animation(QPointF,int,QList<QString>&)), this, SLOT(received_Animation(QPointF,int,QList<QString>&)));
+    connect(MinionManager, SIGNAL(request_RangeAttack(Life_t*,QPointF,double,double,LifeTeam)), this, SLOT(rangeAttack(Life_t*,QPointF,double,double,LifeTeam)));
 
     TowerManager = new TowerManager_t();
     connect(TowerManager, SIGNAL(itemAdded(QGraphicsItem*)), this, SLOT(emit_ItemAdded(QGraphicsItem*)));
@@ -43,6 +44,58 @@ void BattleManager_t::addArrow(Life_t *target, double damage, QPointF pos)
 void BattleManager_t::received_Animation(QPointF center, int ms, QList<QString> &pathList)
 {
     emit request_Animation(center, ms, pathList);
+}
+
+void BattleManager_t::rangeAttack(Life_t* requester, QPointF center, double range, double damage, LifeTeam targetTeam)
+{
+    // for each tower
+    for(int i=0;i<6;++i)
+    {
+        Tower_t* tar_ptr = this->TowerManager->TowerList[i];
+        if( tar_ptr == nullptr || tar_ptr->Team != targetTeam || tar_ptr == requester )
+            continue;
+
+        double tarHeight = tar_ptr->pixmap().size().height();
+        double tarWidth = tar_ptr->pixmap().size().width();
+        if( tar_ptr->Range + std::sqrt(tarHeight*tarHeight+tarWidth*tarWidth)/2 < distance(tar_ptr->Center, center) ) // obviously impossible in range, this line aims to prevent the following commands from being executed
+            continue;
+
+        double tarX[2] = {tar_ptr->Center.x() - tarWidth/2  ,  tar_ptr->Center.x() + tarWidth/2}; // four corner of tower
+        double tarY[2] = {tar_ptr->Center.y() - tarHeight/2  ,  tar_ptr->Center.y() + tarHeight/2}; // four corner of tower
+        QPointF tarCorner[4];
+        for(int a=0;a<2;++a) // create four points for four corner
+            for(int b=0;b<2;++b)
+                tarCorner[a*2 + b] = QPointF(tarX[a], tarY[b]);
+
+        double minDist = 1e9; // minimum distance between tower and minion
+        // for each cornor; minimum dist may be dist(corner, point) or dist(side, point)
+        for(int i=0;i<4;++i)
+        {
+            minDist = std::min(minDist, distance(center, tarCorner[i]));
+
+            if( crossProduct(center, tarCorner[i], tarCorner[(i+1)%4]) > 0   &&   crossProduct(center, tarCorner[(i+1)%4], tarCorner[i]) < 0 ) // % 4 is to change 4 to 0
+                minDist = std::min(minDist, fabs( crossProduct(center, tarCorner[i], tarCorner[(i+1)%4]) ) / distance(tarCorner[i], tarCorner[(i+1)%4]) ); // use the area of triangle to calculate distance to line
+
+            if( minDist <= range )
+            {
+                tar_ptr->HP -= damage;
+                break;
+            }
+        }
+    }
+
+    // then each minion
+    for(Minion_t* tar_ptr : this->MinionManager->MinionList)
+    {
+        if( tar_ptr->Team != targetTeam || tar_ptr == requester )
+            continue;
+
+        const QPointF& tarPos = tar_ptr->Center;
+        if( distance(center, tarPos) <= range )
+        {
+            tar_ptr->HP -= damage;
+        }
+    }
 }
 
 void BattleManager_t::addMinion(MinionType Type, MinionTeam Group, QPointF Position)
@@ -98,19 +151,19 @@ void BattleManager_t::findLifeInRange(Life_t *requester, LifeTeam tarTeam, Life_
                 tarCorner[a*2 + b] = QPointF(tarX[a], tarY[b]);
 
         double minDist = 1e9; // minimum distance between tower and minion
-        // for each cornor, minimum dist may be dist(corner, point) or dist(line, point)
+        // for each cornor; minimum dist may be dist(corner, point) or dist(line, point)
         for(int i=0;i<4;++i)
         {
             minDist = std::min(minDist, distance(refPos, tarCorner[i]));
 
             if( crossProduct(refPos, tarCorner[i], tarCorner[(i+1)%4]) > 0   &&   crossProduct(refPos, tarCorner[(i+1)%4], tarCorner[i]) < 0 ) // % 4 is to change 4 to 0
                 minDist = std::min(minDist, fabs( crossProduct(refPos, tarCorner[i], tarCorner[(i+1)%4]) ) / distance(tarCorner[i], tarCorner[(i+1)%4]) ); // use the area of triangle to calculate distance to line
-        }
 
-        if( minDist <= requester->Range )
-        {
-            response = dynamic_cast<Life_t*>(tar_ptr);
-            return;
+            if( minDist <= requester->Range )
+            {
+                response = dynamic_cast<Life_t*>(tar_ptr);
+                return;
+            }
         }
     }
 

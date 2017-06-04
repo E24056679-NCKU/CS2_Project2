@@ -48,6 +48,8 @@ public slots:
     // forward to System
     void received_Animation(QPointF center, int ms, QList<QString> &pathList);
 
+    void rangeAttack(Life_t* requester, QPointF center, double range, double damage, LifeTeam targetTeam);
+
 signals:
     // tell System an item has been created
     void itemAdded(QGraphicsItem* addItem);

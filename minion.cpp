@@ -81,8 +81,9 @@ Minion_t *MinionManager_t::addMinion(MinionType Type, MinionTeam Team, QPointF P
     newMinion->setPos( newMinion->Pos );
     connect(newMinion, SIGNAL(died(Minion_t*)), this, SLOT(receivedMinionDied(Minion_t*)));
     connect(newMinion, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(received_FindTarget(Life_t*,LifeTeam,Life_t*&)));
-    connect(newMinion, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(receive_arrowAttack(Life_t*,double,QPointF)));
+    connect(newMinion, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(receive_ArrowAttack(Life_t*,double,QPointF)));
     connect(newMinion, SIGNAL(request_Animation(QPointF,int,QList<QString>&)), this, SLOT(received_Animation(QPointF,int,QList<QString>&)));
+    connect(newMinion, SIGNAL(request_RangeAttack(Life_t*,QPointF,double,double,LifeTeam)), this, SLOT(received_RangeAttack(Life_t*,QPointF,double,double,LifeTeam)));
     return newMinion;
 }
 
@@ -106,7 +107,7 @@ void MinionManager_t::received_FindTarget(Life_t *requester, LifeTeam tarTeam, L
     emit request_FindTarget(requester, tarTeam, response);
 }
 
-void MinionManager_t::receive_arrowAttack(Life_t *target, double damage, QPointF pos)
+void MinionManager_t::receive_ArrowAttack(Life_t *target, double damage, QPointF pos)
 {
     emit emit_ArrowAttack(target, damage, pos);
 }
@@ -114,6 +115,11 @@ void MinionManager_t::receive_arrowAttack(Life_t *target, double damage, QPointF
 void MinionManager_t::received_Animation(QPointF center, int ms, QList<QString> &pathList)
 {
     emit request_Animation(center, ms, pathList);
+}
+
+void MinionManager_t::received_RangeAttack(Life_t *requester, QPointF center, double range, double damage, LifeTeam targetTeam)
+{
+    emit request_RangeAttack(requester, center, range, damage, targetTeam);
 }
 
 
