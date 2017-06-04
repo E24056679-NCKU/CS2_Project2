@@ -5,6 +5,7 @@ BattleManager_t::BattleManager_t() : QObject()
     MinionManager = new MinionManager_t();
     connect(MinionManager, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(findLifeInRange(Life_t*,LifeTeam,Life_t*&)));
     connect(MinionManager, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(addArrow(Life_t*,double,QPointF)));
+    connect(MinionManager, SIGNAL(request_Animation(QPointF,int,QList<QString>&)), this, SLOT(received_Animation(QPointF,int,QList<QString>&)));
 
     TowerManager = new TowerManager_t();
     connect(TowerManager, SIGNAL(itemAdded(QGraphicsItem*)), this, SLOT(emit_ItemAdded(QGraphicsItem*)));
@@ -37,6 +38,11 @@ void BattleManager_t::emit_ItemRemoved(QGraphicsItem *rmItem)
 void BattleManager_t::addArrow(Life_t *target, double damage, QPointF pos)
 {
     itemAdded( dynamic_cast<QGraphicsItem*>(new Arrow_t(target, damage, pos)) );
+}
+
+void BattleManager_t::received_Animation(QPointF center, int ms, QList<QString> &pathList)
+{
+    emit request_Animation(center, ms, pathList);
 }
 
 void BattleManager_t::addMinion(MinionType Type, MinionTeam Group, QPointF Position)

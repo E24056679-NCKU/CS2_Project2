@@ -64,6 +64,8 @@ public:
     void addItem(QGraphicsItem* Item);
     void removeItem(QGraphicsItem* Item);
 
+    void addAnimation(QPointF center, int ms, QList<QString> &pathList);
+
 protected:
     MyQGraphicsScene* Scene;
     QGraphicsView* View;

@@ -8,7 +8,7 @@ Tower_t::Tower_t() : Life_t()
     this->setEnabled(0);
 
     //DBG
-    this->HP = 10;
+    this->HP = 100;
 }
 
 Tower_t::~Tower_t()

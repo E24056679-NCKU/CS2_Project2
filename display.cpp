@@ -4,8 +4,7 @@
 Display_t::Display_t()
 {
     Scene = new MyQGraphicsScene();
-    //Scene->setSceneRect(0, 0, 800, 600);
-    Scene->setSceneRect(-800, -600, 2400, 1800);
+    Scene->setSceneRect(0, 0, 800, 600);
     View = new QGraphicsView(Scene);
     View->show();
 
@@ -33,6 +32,11 @@ void Display_t::addItem(QGraphicsItem *Item)
 void Display_t::removeItem(QGraphicsItem *Item)
 {
     Scene->removeItem(Item);
+}
+
+void Display_t::addAnimation(QPointF center, int ms, QList<QString> &pathList)
+{
+    this->addItem( dynamic_cast<QGraphicsItem*>(new Animation_t(center, ms, pathList)) );
 }
 
 ControllableDisplay_t::ControllableDisplay_t()
@@ -102,9 +106,10 @@ MyQGraphicsScene::~MyQGraphicsScene()
 
 void MyQGraphicsScene::updateBlackScreen()
 {
-    BlackScreen->fill(QColor(0, 0, 0, 255)); // completely black
+    BlackScreen->fill(QColor(0, 0, 0, 100)); // completely black
     for(auto &item_ptr : QGraphicsScene::items())
     {
+        // Minion can lighten dark area
         Minion_t* minion = dynamic_cast<Minion_t*>(item_ptr);
         if(minion != nullptr && minion->Team == MinionTeam::MyTeam)
         {
@@ -112,6 +117,24 @@ void MyQGraphicsScene::updateBlackScreen()
             int rb = std::min(799.0, minion->Center.x() + 100); // right
             int ub = std::max(0.0, minion->Center.y() - 100); // up
             int db = std::min(599.0, minion->Center.y() + 100); // down
+
+            for(int i=lb;i<=rb;++i)
+            {
+                for(int j=ub;j<=db;++j)
+                {
+                    BlackScreen->setPixelColor(i, j, QColor(255, 255, 255, 0)); // transparent
+                }
+            }
+        }
+
+        // Animation can lighten dark area
+        Animation_t* ani = dynamic_cast<Animation_t*>(item_ptr);
+        if(ani != nullptr)
+        {
+            int lb = std::max(0.0, ani->Center.x() - 100); // left bound
+            int rb = std::min(799.0, ani->Center.x() + 100); // right
+            int ub = std::max(0.0, ani->Center.y() - 100); // up
+            int db = std::min(599.0, ani->Center.y() + 100); // down
 
             for(int i=lb;i<=rb;++i)
             {

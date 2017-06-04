@@ -1,11 +1,16 @@
 #include "animation.h"
 
-Animation_t::Animation_t(QPointF pos, int ms, QList<QString> &pathList)
+Animation_t::Animation_t(QPointF center, int ms, QList<QString> &pathList)
 {
+    this->Center = center;
     Timer = new QTimer;
     PathList = pathList;
-    this->setPos(pos);
     this->setPixmap( QPixmap(*pathList.begin()) );
+
+    // pos = center - side_len/2
+    QPointF pos = this->Center - QPointF(1.0*this->pixmap().size().width()/2 , 1.0*this->pixmap().size().height()/2);
+    this->setPos(pos);
+
     connect(Timer, SIGNAL(timeout()), this, SLOT(nextImage()));
     Timer->start(ms);
 }
@@ -22,11 +27,12 @@ void Animation_t::nextImage()
     if( it != PathList.end() )
     {
         this->setPixmap( QPixmap(*it) );
+        QPointF pos = this->Center - QPointF(1.0*this->pixmap().size().width()/2 , 1.0*this->pixmap().size().height()/2);
+        this->setPos(pos);
     }
     else
     {
         Timer->stop();
-        emit animationEnds(this); // ask scene to remove this
         delete this; // perhaps dangerous
     }
 }

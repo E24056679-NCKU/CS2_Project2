@@ -42,6 +42,7 @@ System::System(ControllerSlot_t* Controller1 = nullptr, ControllerSlot_t* Contro
     BattleManager = new BattleManager_t();
     connect(BattleManager, SIGNAL(itemAdded(QGraphicsItem*)), this, SLOT(itemAdded(QGraphicsItem*)));
     connect(BattleManager, SIGNAL(itemRemoved(QGraphicsItem*)), this, SLOT(itemRemoved(QGraphicsItem*)));
+    connect(BattleManager, SIGNAL(request_Animation(QPointF,int,QList<QString>&)), this, SLOT(addAnimation(QPointF,int,QList<QString>&)));
     // not until now can item created by BattleManager be added to scene
     BattleManager->initialize(); // for initializing towers
 }
@@ -100,4 +101,9 @@ void System::receivedSignal2_SelectMinion(Minion_t *selMinion)
 void System::receivedSignal2_SelectCard(int CardID)
 {
     BattleManager->receivedSignal2_SelectCard(CardID);
+}
+
+void System::addAnimation(QPointF center, int ms, QList<QString> &pathList)
+{
+    Display->addAnimation(center, ms, pathList);
 }

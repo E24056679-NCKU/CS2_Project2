@@ -42,6 +42,7 @@ signals:
     void died(Minion_t* rmMinion);
     void selectedByMouse(Minion_t* selMinion);
     void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
+    void request_Animation(QPointF center, int ms, QList<QString> &pathList);
 
 public slots:
     virtual void run();
@@ -102,10 +103,12 @@ public slots:
     void receivedMinionDied(Minion_t* rmMinion);
     void received_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
     void receive_arrowAttack(Life_t* target, double damage, QPointF pos);
+    void received_Animation(QPointF center, int ms, QList<QString> &pathList);
 
 signals:
     void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
     void emit_ArrowAttack(Life_t* target, double damage, QPointF pos);
+    void request_Animation(QPointF center, int ms, QList<QString> &pathList);
 
 protected:
 

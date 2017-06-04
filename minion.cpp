@@ -90,6 +90,7 @@ Minion_t *MinionManager_t::addMinion(MinionType Type, MinionTeam Team, QPointF P
     connect(newMinion, SIGNAL(died(Minion_t*)), this, SLOT(receivedMinionDied(Minion_t*)));
     connect(newMinion, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(received_FindTarget(Life_t*,LifeTeam,Life_t*&)));
     connect(newMinion, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(receive_arrowAttack(Life_t*,double,QPointF)));
+    connect(newMinion, SIGNAL(request_Animation(QPointF,int,QList<QString>&)), this, SLOT(received_Animation(QPointF,int,QList<QString>&)));
     return newMinion;
 }
 
@@ -116,6 +117,11 @@ void MinionManager_t::received_FindTarget(Life_t *requester, LifeTeam tarTeam, L
 void MinionManager_t::receive_arrowAttack(Life_t *target, double damage, QPointF pos)
 {
     emit emit_ArrowAttack(target, damage, pos);
+}
+
+void MinionManager_t::received_Animation(QPointF center, int ms, QList<QString> &pathList)
+{
+    emit request_Animation(center, ms, pathList);
 }
 
 
@@ -149,8 +155,8 @@ DerivedMinion_t::DerivedMinion_t() : Minion_t()
     this->setPixmap( * (this->BasicImage) );
 
     // DBG
-    this->Range = 50;
-    this->HP = 50;
+    this->Range = 0;
+    this->HP = 10000;
 
     this->Timer->start(1000);
 }
@@ -171,10 +177,12 @@ void DerivedMinion_t::run()
     Life_t* tarLife;
     findTarget(tarLife);
 
-    //qDebug() << "Reference point at " << this->Pos;
     if(tarLife == nullptr)
     {
-        //qDebug() << "not found";
+        //DBG
+        this->Speed = 10;
+
+        move();
     }
     else
     {
@@ -193,7 +201,13 @@ void DerivedMinion_t::run()
 
 void DerivedMinion_t::move()
 {
+    this->Pos.setX( this->Pos.x() + this->Speed);
+    this->Center.setX( this->Pos.x() + this->Speed ); // !! remember to set Center, or fog will go wrong
+    this->setPos(this->Pos);
 
+    // if out of boundary
+    if( this->Center.x() < 0 || this->Center.x() > 800)
+        emit died(this);
 }
 
 void DerivedMinion_t::attack(Life_t *target)

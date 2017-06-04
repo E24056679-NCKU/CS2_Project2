@@ -15,14 +15,12 @@ class Animation_t : public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
 public:
-    Animation_t(QPointF pos, int ms, QList<QString> &pathList); // each image last ms milliseconds, pathList stores the path of each image
+    Animation_t(QPointF center, int ms, QList<QString> &pathList); // each image last ms milliseconds, pathList stores the path of each image
     ~Animation_t();
+    QPointF Center;
 
 public slots:
     void nextImage();
-
-signals:
-    void animationEnds(Animation_t* rmAni);
 
 protected:
     QTimer* Timer;

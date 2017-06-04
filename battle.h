@@ -43,12 +43,12 @@ public slots:
 
     void addArrow(Life_t* target, double damage, QPointF pos);
 
-
+    void received_Animation(QPointF center, int ms, QList<QString> &pathList);
 
 signals:
     void itemAdded(QGraphicsItem* addItem);
     void itemRemoved(QGraphicsItem* rmItem);
-
+    void request_Animation(QPointF center, int ms, QList<QString> &pathList);
 
 protected:
     MinionManager_t* MinionManager;

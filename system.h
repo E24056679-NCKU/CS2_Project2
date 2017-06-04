@@ -34,6 +34,8 @@ protected slots:
     void receivedSignal2_SelectMinion(Minion_t* selMinion);
     void receivedSignal2_SelectCard(int CardID);
 
+    void addAnimation(QPointF center, int ms, QList<QString> &pathList);
+
 protected:
     // BattleManager arrange all things about the battlefield
     BattleManager_t* BattleManager;
