@@ -6,7 +6,7 @@
 #include <QGraphicsPixmapItem>
 #include "life.h"
 
-typedef LifeTeam TowerTeam;
+typedef LifeTeam TowerTeam; // LifeTeam = TowerTeam = MinionTeam
 typedef LifeTeam MinionTeam;
 
 class Minion_t;
@@ -26,13 +26,11 @@ class Tower_t : public Life_t
 public:
     Tower_t();
     ~Tower_t();
-    void findTarget(Life_t* &response); // response is a reference
 
     bool checkDied();
 
 signals:
     void died(Tower_t* rmTower);
-    void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
 
 public slots:
     void run();
@@ -43,11 +41,12 @@ public slots:
 class TowerManager_t : public QObject
 {
     Q_OBJECT
-
     friend class BattleManager_t;
+
 public:
     TowerManager_t();
     ~TowerManager_t();
+    // create and setup 6 towers
     void initializeTowers();
 
 public slots:
@@ -64,7 +63,7 @@ private:
     // TL[0] is my main tower; TL[1] is the tower on the left side of TL[0]
     // TL[3] is my main tower; TL[4] is the tower on the left side of TL[3]
     Tower_t* TowerList[6];
-    // if Tower[i] died , TowerList[i] will be changed to nullptr
+    // if TowerList[i] died , TowerList[i] will be changed to nullptr
 };
 
 #endif // TOWER_H

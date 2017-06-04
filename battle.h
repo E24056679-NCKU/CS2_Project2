@@ -38,16 +38,22 @@ public slots:
     void emit_ItemAdded(QGraphicsItem* addItem);
     void emit_ItemRemoved(QGraphicsItem* rmItem);
 
+    // find one Life in requester's Range, the response is not necessarily be the closest one to requester
     // Note that reponse is a reference
     void findLifeInRange(Life_t* requester, LifeTeam tarTeam, Life_t* &response);
 
+    // create an arrow, then itemAdd() it
     void addArrow(Life_t* target, double damage, QPointF pos);
 
+    // forward to System
     void received_Animation(QPointF center, int ms, QList<QString> &pathList);
 
 signals:
+    // tell System an item has been created
     void itemAdded(QGraphicsItem* addItem);
+    // tell System an item has been removed
     void itemRemoved(QGraphicsItem* rmItem);
+    // forward to System
     void request_Animation(QPointF center, int ms, QList<QString> &pathList);
 
 protected:
@@ -55,10 +61,15 @@ protected:
     TowerManager_t* TowerManager;
 
 
+    // the card (out of the four we can selected in screen) selected
     int CardSelected_Player1; // default (no selected) = -1
+    // map the selectedCardNumber to MinionType
     MinionType CardtoMinionType_Player1[4]; // store Card[i]'s MinionTypeID
+
     int CardSelected_Player2; // default (no selected) = -1
     MinionType CardtoMinionType_Player2[4]; // store Card[i]'s MinionTypeID
+
+    // minion selected by user (hero system)
     Minion_t* MinionSelected_Player1;
     Minion_t* MinionSelected_Player2;
 

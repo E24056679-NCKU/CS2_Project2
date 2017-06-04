@@ -27,20 +27,6 @@ bool Minion_t::checkDied()
     }
 }
 
-void Minion_t::findTarget(Life_t *&response)
-{
-    LifeTeam tarTeam;
-    if( this->Team == MinionTeam::MyTeam )
-        tarTeam = LifeTeam::OpsTeam;
-    else if( this->Team == MinionTeam::OpsTeam )
-        tarTeam = LifeTeam::MyTeam;
-
-    // DBG
-    tarTeam = LifeTeam::MyTeam;
-
-    emit request_FindTarget( dynamic_cast<Life_t*>(this) , tarTeam, response);
-}
-
 void Minion_t::run()
 {
     qDebug() << "Error, abstract Minion's run has been executed";
@@ -48,7 +34,13 @@ void Minion_t::run()
 
 void Minion_t::move()
 {
-    qDebug() << "Error, abstract Minion's move has been executed";
+    this->Pos.setX( this->Pos.x() + this->Speed);
+    this->Center.setX( this->Pos.x() + this->Speed ); // !! remember to set Center, or fog will go wrong
+    this->setPos(this->Pos);
+
+    // if out of boundary
+    if( this->Center.x() < 0 || this->Center.x() > 800)
+        emit died(this);
 }
 
 void Minion_t::attack(Life_t *target)
@@ -135,30 +127,25 @@ DerivedMinion_t::DerivedMinion_t() : Minion_t()
     if( DerivedMinion_t::BasicImage == nullptr ) // construct Pixmaps if they haven't been constructed
     {
         DerivedMinion_t::BasicImage = new QPixmap("./resources/images/DerivedMinion.png");
+
+        // import moving images
         for( int i=1 ; i<=0 ; ++i )
         {
-            char path[100];
-            strcpy(path, "./resources/images/DerivedMinion_move_x.png");
-            int len = strlen(path);
-            path[len-5] = i + '0';
-            DerivedMinion_t::MovingImages.push_back( new QPixmap(path) );
+            DerivedMinion_t::MovingImages.push_back( new QPixmap( QString("./resources/images/DerivedMinion_move_") + i + ".png" ) );
         }
+
+        // import attacking images
         for( int i=1 ; i<=0 ; ++i)
-        {
-            char path[100];
-            strcpy(path, "./resources/images/DerivedMinion_attack_x.png");
-            int len = strlen(path);
-            path[len-5] = i + '0';
-            DerivedMinion_t::AttackingImages.push_back( new QPixmap(path) );
-        }
+            DerivedMinion_t::AttackingImages.push_back( new QPixmap( QString("./resources/images/DerivedMinion_attack_") + i + ".png" ) );
     }
     this->setPixmap( * (this->BasicImage) );
 
     // DBG
     this->Range = 0;
     this->HP = 10000;
+    this->Hz = 1;
 
-    this->Timer->start(1000);
+    this->Timer->start(1000 / Hz);
 }
 
 DerivedMinion_t::~DerivedMinion_t()
@@ -168,16 +155,16 @@ DerivedMinion_t::~DerivedMinion_t()
 
 void DerivedMinion_t::run()
 {
-    if(this->checkDied())
+    if(this->checkDied()) //  if the minion died, then checkDied() will emit signal "died()" to MinionManager, then this will be deleted
         return;
 
     //DBG
     this->Damage = 1;
 
-    Life_t* tarLife;
+    Life_t* tarLife; // receive the response of findTarget()
     findTarget(tarLife);
 
-    if(tarLife == nullptr)
+    if(tarLife == nullptr) // none is in Range
     {
         //DBG
         this->Speed = 10;
@@ -186,28 +173,17 @@ void DerivedMinion_t::run()
     }
     else
     {
-        if( dynamic_cast<Minion_t*>(tarLife) )
+        if( dynamic_cast<Minion_t*>(tarLife) ) // if the response is a Minion
         {
             // DBG
             //arrowAttack(tarLife);
         }
-        else if( dynamic_cast<Tower_t*>(tarLife) )
+        else if( dynamic_cast<Tower_t*>(tarLife) ) // if the response is a Tower
         {
             // DBG
             arrowAttack(tarLife);
         }
     }
-}
-
-void DerivedMinion_t::move()
-{
-    this->Pos.setX( this->Pos.x() + this->Speed);
-    this->Center.setX( this->Pos.x() + this->Speed ); // !! remember to set Center, or fog will go wrong
-    this->setPos(this->Pos);
-
-    // if out of boundary
-    if( this->Center.x() < 0 || this->Center.x() > 800)
-        emit died(this);
 }
 
 void DerivedMinion_t::attack(Life_t *target)

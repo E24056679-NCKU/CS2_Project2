@@ -16,6 +16,7 @@
 #include "life.h"
 #include "minion.h"
 
+// Button at the downside of screen
 class Button_t : public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
@@ -33,7 +34,7 @@ private:
 };
 
 
-// for BlackScreen and override mousePressEvent
+// for BlackScreen and overriding mousePressEvent
 class MyQGraphicsScene : public QGraphicsScene
 {
     Q_OBJECT
@@ -42,6 +43,7 @@ public:
     ~MyQGraphicsScene();
 
 public slots:
+    // rendering the BlackScreen(QImage) and update PixmapItem
     void updateBlackScreen();
 
 signals:
@@ -52,6 +54,7 @@ protected:
     QImage* BlackScreen;
     QGraphicsPixmapItem* BlackScreenItem;
     QTimer* Timer; // for updating BlackScreen
+    const static int Hz = 20; // frequecy of updating BlackScreen, i.e., run updateBlackScreen()
 };
 
 
@@ -76,8 +79,9 @@ private:
 
 };
 
-// ControllerSlot_t (which is a QObject) must be inherited first
-class ControllableDisplay_t : public ControllerSlot_t, public Display_t
+
+// ControllableDisplay is like a touchscreen, it's an output source and also a input source
+class ControllableDisplay_t : public ControllerSlot_t, public Display_t // ControllerSlot_t (which is a QObject) must be inherited first
 {
     Q_OBJECT
 public:

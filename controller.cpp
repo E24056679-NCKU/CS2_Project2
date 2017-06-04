@@ -15,13 +15,6 @@ void ControllerSlot_t::emit_ReceivedSignal_SelectPosition(QPointF Position)
     emit receivedSignal_SelectPosition(Position);
 }
 
-/*
-void ControllerSlot_t::emit_ReceivedSignal_SelectMinion(QPointF Position)
-{
-    emit receivedSignal_SelectMinion(Position);
-}
-*/
-
 void ControllerSlot_t::emit_ReceivedSignal_SelectMinion(Minion_t *selMinion)
 {
     emit receivedSignal_SelectMinion(selMinion);

@@ -15,17 +15,17 @@ public:
     virtual ~ControllerSlot_t();
 
 protected slots:
+    // these three functions are for Controller Designer to send signal
+    // i.e., when the Controller finish its signal processing, it should call one of these function to emit signal
     void emit_ReceivedSignal_SelectPosition(QPointF Position);
-    //void emit_ReceivedSignal_SelectMinion(QPointF Position);
     void emit_ReceivedSignal_SelectMinion(Minion_t* selMinion);
     void emit_ReceivedSignal_SelectCard(int CardID);
 
 signals:
+    // emit signals to System , then System will forward the signal to BattleManager
     void receivedSignal_SelectPosition(QPointF Position);
-    // due to technical restriction, use Position to find which Minion is selected
-    //void receivedSignal_SelectMinion(QPointF Position);
     void receivedSignal_SelectMinion(Minion_t* selMinion);
-    void receivedSignal_SelectCard(int CardID); // CardID is 0~3
+    void receivedSignal_SelectCard(int CardID); // CardID = [0,3]
 
 private:
 

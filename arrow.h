@@ -16,7 +16,8 @@ public:
     ~Arrow_t();
     double Damage;
     QPointF Pos;
-    const static double Speed; // how far an arrow can move in a tick
+    const static int Hz = 10;
+    const static double Speed; // how far an arrow can move in a tick, scalar
 
 protected slots:
     void timerTick();

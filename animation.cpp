@@ -5,10 +5,10 @@ Animation_t::Animation_t(QPointF center, int ms, QList<QString> &pathList)
     this->Center = center;
     Timer = new QTimer;
     PathList = pathList;
-    this->setPixmap( QPixmap(*pathList.begin()) );
+    this->setPixmap( QPixmap(*pathList.begin()) ); // set the Pixmap to the first image
 
     // pos = center - side_len/2
-    QPointF pos = this->Center - QPointF(1.0*this->pixmap().size().width()/2 , 1.0*this->pixmap().size().height()/2);
+    QPointF pos = this->Center - QPointF(1.0*this->pixmap().size().width()/2 , 1.0*this->pixmap().size().height()/2); // set the position of the image
     this->setPos(pos);
 
     connect(Timer, SIGNAL(timeout()), this, SLOT(nextImage()));
@@ -23,7 +23,7 @@ Animation_t::~Animation_t()
 void Animation_t::nextImage()
 {
     static QList<QString>::iterator it = PathList.begin();
-    ++it;
+    ++it; //
     if( it != PathList.end() )
     {
         this->setPixmap( QPixmap(*it) );
@@ -33,6 +33,6 @@ void Animation_t::nextImage()
     else
     {
         Timer->stop();
-        delete this; // perhaps dangerous
+        delete this;
     }
 }

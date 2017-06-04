@@ -14,7 +14,7 @@ enum LifeTeam
 {
     MyTeam = 0,
     OpsTeam, // opponent's group
-    NoTeam // NoTeam can attack other teams, while other teams cannot attack NoTeam
+    NoTeam
 };
 
 enum LifeType
@@ -38,17 +38,28 @@ public:
     double Speed;
     LifeTeam Team;
     LifeType LType;
+    int Hz;
 
 signals:
+    // when a Minion die, emit this signal to tell MinionManager to delete the minion
     void died(Life_t* rmLife);
     void emit_ArrowAttack(Life_t* target, double damage, QPointF pos);
+    // send to Manager, then Manager forward it to BattleManager
+    void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
 
 public slots:
-    virtual void run() = 0;
-    virtual void attack(Life_t* target) = 0; // there might be lots of types of attack
-    virtual void arrowAttack(Life_t* target); // simply shoot
+    // run is connected to Timer::timeout
+    virtual void run() = 0; // every life has its own run(), so make it abstract
+    // attack other minion, may be skill or not skill.
+    virtual void attack(Life_t* target) = 0; // there might be lots of types of attack, so make it abstrct
+    // launch an arrow to attack target
+    virtual void arrowAttack(Life_t* target); // simply shoot, so no need abstract
+
+    // Note that reponse is a reference
+    virtual void findTarget(Life_t* &response); // response is a reference
 
 public:
+    // check whether a life died
     virtual bool checkDied() = 0;
 
 protected:

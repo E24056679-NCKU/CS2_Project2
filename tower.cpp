@@ -5,29 +5,15 @@ Tower_t::Tower_t() : Life_t()
 {
     this->setZValue(-1);
     this->LType = LifeType::Tower;
-    this->setEnabled(0);
 
     //DBG
     this->HP = 100;
+    this->Hz = 1;
 }
 
 Tower_t::~Tower_t()
 {
 
-}
-
-void Tower_t::findTarget(Life_t *&response)
-{
-    LifeTeam tarTeam;
-    if( this->Team == TowerTeam::MyTeam )
-        tarTeam = LifeTeam::OpsTeam;
-    else if( this->Team == TowerTeam::OpsTeam )
-        tarTeam = LifeTeam::MyTeam;
-
-    //DBG
-    tarTeam = LifeTeam::MyTeam;
-
-    emit request_FindTarget( dynamic_cast<Life_t*>(this) , tarTeam, response);
 }
 
 bool Tower_t::checkDied()
@@ -55,22 +41,20 @@ void Tower_t::run()
     Life_t* tarLife;
     findTarget(tarLife);
 
-    // qDebug() << "Reference tower at " << this->Pos;
     if(tarLife == nullptr)
     {
-        // qDebug() << "not found";
+
     }
     else
     {
-        // qDebug() << "tower found minion at " << tarLife->Pos;
         // DBG
-        arrowAttack(tarLife);
+        attack(tarLife);
     }
 }
 
 void Tower_t::attack(Life_t *target)
 {
-
+    arrowAttack(target);
 }
 
 TowerManager_t::TowerManager_t() : QObject()
@@ -90,7 +74,7 @@ void TowerManager_t::initializeTowers()
     for(int i=0;i<6;++i)
     {
         TowerList[i] = new Tower_t();
-        if(i % 3)
+        if(i % 3) // normal tower
         {
             TowerList[i]->setPixmap(QPixmap("./resources/images/Tower.png"));
         }
@@ -101,7 +85,7 @@ void TowerManager_t::initializeTowers()
         emit itemAdded( dynamic_cast<QGraphicsItem*>(TowerList[i]) );
     }
     TowerList[0]->Pos = QPointF(0, 175);
-    TowerList[1]->Pos = QPointF(100, 25); // center = pos + (50, 50) for normal tower
+    TowerList[1]->Pos = QPointF(100, 25);
     TowerList[2]->Pos = QPointF(100, 375);
     TowerList[3]->Pos = QPointF(650, 175);
     TowerList[4]->Pos = QPointF(550, 375);
@@ -115,11 +99,14 @@ void TowerManager_t::initializeTowers()
     {
         TowerList[i]->setPos(TowerList[i]->Pos);
         TowerList[i]->Range = 100;
-        TowerList[i]->Team = TowerTeam::MyTeam;
+        if( i < 3 )
+            TowerList[i]->Team = TowerTeam::MyTeam;
+        else
+            TowerList[i]->Team = TowerTeam::OpsTeam;
         connect(TowerList[i], SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(received_FindTarget(Life_t*,LifeTeam,Life_t*&)));
         connect(TowerList[i], SIGNAL(died(Tower_t*)), this, SLOT(receivedTowerDied(Tower_t*)));
         connect(TowerList[i], SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(receive_arrowAttack(Life_t*,double,QPointF)));
-        TowerList[i]->Timer->start(1000);
+        TowerList[i]->Timer->start(1000 / TowerList[i]->Hz);
     }
 }
 

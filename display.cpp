@@ -90,13 +90,13 @@ MyQGraphicsScene::MyQGraphicsScene()
 {
     Timer = new QTimer;
     connect(Timer, SIGNAL(timeout()), this, SLOT(updateBlackScreen()));
-    BlackScreen = new QImage(800, 600, QImage::Format_ARGB32);
-    BlackScreen->fill(QColor(0, 0, 0));
+    BlackScreen = new QImage(800, 600, QImage::Format_ARGB32); // the size of the Image is the same as Scene's
+    BlackScreen->fill(QColor(0, 0, 0)); // all black
     BlackScreenItem = new QGraphicsPixmapItem( QPixmap::fromImage(*BlackScreen) );
-    BlackScreenItem->setZValue(0.9);
+    BlackScreenItem->setZValue(0.9); // BlackScreenItem is at above all items, except Buttons
     BlackScreenItem->setPos(0, 0);
     this->addItem(BlackScreenItem);
-    Timer->start(50); // 20Hz
+    Timer->start( 1000 / Hz ); // 1000ms = Hz * Period
 }
 
 MyQGraphicsScene::~MyQGraphicsScene()
@@ -107,16 +107,16 @@ MyQGraphicsScene::~MyQGraphicsScene()
 void MyQGraphicsScene::updateBlackScreen()
 {
     BlackScreen->fill(QColor(0, 0, 0, 100)); // completely black
-    for(auto &item_ptr : QGraphicsScene::items())
+    for(auto &item_ptr : QGraphicsScene::items()) // for each item in QGraphcisScene
     {
         // Minion can lighten dark area
-        Minion_t* minion = dynamic_cast<Minion_t*>(item_ptr);
-        if(minion != nullptr && minion->Team == MinionTeam::MyTeam)
+        Life_t* life = dynamic_cast<Life_t*>(item_ptr);
+        if(life != nullptr && life->Team == LifeTeam::MyTeam) // if the item is a Minion
         {
-            int lb = std::max(0.0, minion->Center.x() - 100); // left bound
-            int rb = std::min(799.0, minion->Center.x() + 100); // right
-            int ub = std::max(0.0, minion->Center.y() - 100); // up
-            int db = std::min(599.0, minion->Center.y() + 100); // down
+            int lb = std::max(0.0, life->Center.x() - 100); // left bound
+            int rb = std::min(799.0, life->Center.x() + 100); // right
+            int ub = std::max(0.0, life->Center.y() - 100); // up
+            int db = std::min(599.0, life->Center.y() + 100); // down
 
             for(int i=lb;i<=rb;++i)
             {
@@ -129,7 +129,7 @@ void MyQGraphicsScene::updateBlackScreen()
 
         // Animation can lighten dark area
         Animation_t* ani = dynamic_cast<Animation_t*>(item_ptr);
-        if(ani != nullptr)
+        if(ani != nullptr) // if the item is a Animation
         {
             int lb = std::max(0.0, ani->Center.x() - 100); // left bound
             int rb = std::min(799.0, ani->Center.x() + 100); // right
