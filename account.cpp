@@ -1,7 +1,7 @@
 #include "account.h"
-#include <fstream>
-#include <string>
 #include <QDebug>
+#include<QFile>
+#include<QString>
 
 Account_t::Account_t(QString Username, QString Password, int Money, int CardCount[])
 {
@@ -26,20 +26,24 @@ void AccountManager_t::loadFile()
 {
     AccountList.clear();
 
-    std::fstream fin;
-    fin.open("./saves/account.txt", std::ios::in);
+    QFile fin("./saves/account.txt");
+    fin.open(QIODevice::ReadWrite);
+    QTextStream in(&fin);
 
-    std::string username;
-    std::string password;
+    QString username;
+    QString password;
     int money;
     int card[6];
-    while(fin >> username)
+    while(!in.atEnd())
     {
-        fin >> password;
-        fin >> money;
+        in >> username;
+        in >> password;
+        if(username == "")
+            break;
+        in >> money;
         for(int i=0;i<6;++i)
-            fin >> card[i];
-        AccountList.insert( QString::fromStdString(username), new Account_t(QString::fromStdString(username), QString::fromStdString(password), money, card) );
+            in >> card[i];
+        AccountList.insert( username, new Account_t(username, password, money, card) );
     }
 
     for(auto &i : AccountList)
@@ -50,23 +54,25 @@ void AccountManager_t::loadFile()
 
 void AccountManager_t::saveFile()
 {
-    std::fstream fout;
-    fout.open("./saves/account.txt", std::ios::out);
+    QFile fout("./saves/account.txt");
+    fout.open(QIODevice::ReadWrite);
+    QTextStream out(&fout);
     for(auto &i : AccountList)
     {
-        fout << i->Username.toStdString() << std::endl;
-        fout << i->Password.toStdString() << std::endl;
-        fout << i->Money << std::endl;
+        out << i->Username << "\n";
+        out << i->Password << "\n";
+        out << i->Money << "\n";
         for(int t=0;t<6;++t)
-            fout << i->CardCount[t] << ' ';
-        fout << std::endl << std::endl;
+           out << i->CardCount[t] << ' ';
+        out << "\n" << "\n";
     }
+    out.flush();
 }
 
 void AccountManager_t::addAccount(Account_t account)
 {
     Account_t* newAccount = new Account_t(account);
-    AccountList.insert(account.Username, newAccount);
+    AccountList.insert(newAccount->Username, newAccount);
     this->saveFile();
 }
 
@@ -78,4 +84,3 @@ Account_t* AccountManager_t::selectAccount(QString username)
     else
         return res.value();
 }
-

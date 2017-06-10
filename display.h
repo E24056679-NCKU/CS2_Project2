@@ -78,6 +78,7 @@ public:
 
     QGraphicsView* ParentView;
     AccountManager_t* AccountManager;
+    Account_t* Account;
 
     QGraphicsScene* GameOverScene;
 
@@ -95,7 +96,11 @@ public:
 
 
     QGraphicsScene* CardManageScene;
-
+    QPushButton* CardManageScene_Button_Card[6];
+    QLabel* CardManageScene_Label_Card[6];
+    QGraphicsPixmapItem* CardManageScene_PixmapItem_Card[6];
+    QPushButton* CardManageScene_Button_Submit;
+    QLabel* CardManageScene_Label;
 
 
     void setupLoginScene();
@@ -109,10 +114,21 @@ public slots:
     void LoginScene_CreateClicked();
     void LoginScene_RankClicked();
 
+
     void changetoRankScene();
     void RankScene_LoginSceneClicked();
 
+
     void changetoCardManageScene();
+    void CardManageScene_SubmitClicked();
+    void CardManageScene_Choose0Clicked();
+    void CardManageScene_Choose1Clicked();
+    void CardManageScene_Choose2Clicked();
+    void CardManageScene_Choose3Clicked();
+    void CardManageScene_Choose4Clicked();
+    void CardManageScene_Choose5Clicked();
+
+
     void changetoGameOverScene();
 
 signals:

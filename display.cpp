@@ -83,6 +83,47 @@ void MenuDisplay_t::setupCardManageScene()
 {
     CardManageScene = new QGraphicsScene;
     CardManageScene->setSceneRect(0, 0, 800, 600);
+
+    for(int i=0;i<6;++i)
+    {
+        this->CardManageScene_Button_Card[i] = new QPushButton;
+        CardManageScene->addWidget( this->CardManageScene_Button_Card[i] );
+        CardManageScene_Button_Card[i]->setGeometry(250*(i%3)+100, 175 + 250*(i/3), 50, 50);
+        CardManageScene_Button_Card[i]->setText("Select");
+    }
+    connect(CardManageScene_Button_Card[0], SIGNAL(pressed()), this, SLOT(CardManageScene_Choose0Clicked()));
+    connect(CardManageScene_Button_Card[1], SIGNAL(pressed()), this, SLOT(CardManageScene_Choose1Clicked()));
+    connect(CardManageScene_Button_Card[2], SIGNAL(pressed()), this, SLOT(CardManageScene_Choose2Clicked()));
+    connect(CardManageScene_Button_Card[3], SIGNAL(pressed()), this, SLOT(CardManageScene_Choose3Clicked()));
+    connect(CardManageScene_Button_Card[4], SIGNAL(pressed()), this, SLOT(CardManageScene_Choose4Clicked()));
+    connect(CardManageScene_Button_Card[5], SIGNAL(pressed()), this, SLOT(CardManageScene_Choose5Clicked()));
+
+    for(int i=0;i<6;++i)
+    {
+        this->CardManageScene_Label_Card[i] = new QLabel;
+        CardManageScene->addWidget( this->CardManageScene_Label_Card[i] );
+        CardManageScene_Label_Card[i]->setGeometry(250*(i%3)+70, 230 + 250*(i/3), 140, 15);
+        CardManageScene_Label_Card[i]->setText("CARD");
+    }
+
+    for(int i=0;i<6;++i)
+    {
+        this->CardManageScene_PixmapItem_Card[i] = new QGraphicsPixmapItem( QPixmap("./resources/images/DerivedMinion.jpg") );
+        CardManageScene->addItem( this->CardManageScene_PixmapItem_Card[i] );
+        CardManageScene_PixmapItem_Card[i]->setScale(3);
+        CardManageScene_PixmapItem_Card[i]->setPos(250*(i%3) + 65, 20 + 250*(i/3));
+    }
+
+    this->CardManageScene_Button_Submit = new QPushButton;
+    CardManageScene->addWidget( this->CardManageScene_Button_Submit );
+    CardManageScene_Button_Submit->setGeometry(350, 500, 50, 50);
+    CardManageScene_Button_Submit->setText("Submit");
+    connect(CardManageScene_Button_Submit, SIGNAL(pressed()), this, SLOT(CardManageScene_SubmitClicked()));
+
+    this->CardManageScene_Label = new QLabel;
+    CardManageScene->addWidget( this->CardManageScene_Label );
+    CardManageScene_Label->setGeometry(10, 565, 790, 25);
+    CardManageScene_Label->setText("HH");
 }
 
 void MenuDisplay_t::setupGameOverScene()
@@ -146,7 +187,10 @@ void MenuDisplay_t::LoginScene_SubmitClicked()
         return;
     }
     this->LoginScene_Label->setText("Login Succeeded");
+
+    this->Account = findRes;
     emit accountLogined(findRes);
+
     this->changetoCardManageScene();
 }
 
@@ -218,8 +262,92 @@ void MenuDisplay_t::RankScene_LoginSceneClicked()
 
 void MenuDisplay_t::changetoCardManageScene()
 {
+    for(int i=0;i<6;++i)
+    {
+        CardManageScene_Label_Card[i]->setText( QString::number(Account->CardCount[i]) );
+        if( Account->CardCount[i] == 0)
+            CardManageScene_Button_Card[i]->setText("Invalid");
+    }
 
     ParentView->setScene( this->CardManageScene );
+}
+
+void MenuDisplay_t::CardManageScene_SubmitClicked()
+{
+    int SelectedCnt = 0;
+    for(int i=0;i<6;++i)
+        if( CardManageScene_Button_Card[i]->text() == "Selected")
+            ++SelectedCnt;
+    if(SelectedCnt > 4)
+    {
+        CardManageScene_Label->setText("Too Many Cards Have Been Selected. You Can Select At Most 4 Cards");
+        return;
+    }
+    else if(SelectedCnt == 0)
+    {
+        CardManageScene_Label->setText("Select At Least One Card");
+        return;
+    }
+    else
+    {
+        CardManageScene_Label->setText("Selected Succeeded");
+    }
+
+}
+
+void MenuDisplay_t::CardManageScene_Choose0Clicked()
+{
+    if( this->CardManageScene_Button_Card[0]->text() == "Invalid")
+        return;
+    else if( this->CardManageScene_Button_Card[0]->text() == "Choose")
+        this->CardManageScene_Button_Card[0]->setText("Selected");
+    else
+        this->CardManageScene_Button_Card[0]->setText("Choose");
+}
+void MenuDisplay_t::CardManageScene_Choose1Clicked()
+{
+    if( this->CardManageScene_Button_Card[1]->text() == "Invalid")
+        return;
+    else if( this->CardManageScene_Button_Card[1]->text() == "Choose")
+        this->CardManageScene_Button_Card[1]->setText("Selected");
+    else
+        this->CardManageScene_Button_Card[1]->setText("Choose");
+}
+void MenuDisplay_t::CardManageScene_Choose2Clicked()
+{
+    if( this->CardManageScene_Button_Card[2]->text() == "Invalid")
+        return;
+    else if( this->CardManageScene_Button_Card[2]->text() == "Choose")
+        this->CardManageScene_Button_Card[2]->setText("Selected");
+    else
+        this->CardManageScene_Button_Card[2]->setText("Choose");
+}
+void MenuDisplay_t::CardManageScene_Choose3Clicked()
+{
+    if( this->CardManageScene_Button_Card[3]->text() == "Invalid")
+        return;
+    else if( this->CardManageScene_Button_Card[3]->text() == "Choose")
+        this->CardManageScene_Button_Card[3]->setText("Selected");
+    else
+        this->CardManageScene_Button_Card[3]->setText("Choose");
+}
+void MenuDisplay_t::CardManageScene_Choose4Clicked()
+{
+    if( this->CardManageScene_Button_Card[4]->text() == "Invalid")
+        return;
+    else if( this->CardManageScene_Button_Card[4]->text() == "Choose")
+        this->CardManageScene_Button_Card[4]->setText("Selected");
+    else
+        this->CardManageScene_Button_Card[4]->setText("Choose");
+}
+void MenuDisplay_t::CardManageScene_Choose5Clicked()
+{
+    if( this->CardManageScene_Button_Card[5]->text() == "Invalid")
+        return;
+    else if( this->CardManageScene_Button_Card[5]->text() == "Choose")
+        this->CardManageScene_Button_Card[5]->setText("Selected");
+    else
+        this->CardManageScene_Button_Card[5]->setText("Choose");
 }
 
 void MenuDisplay_t::changetoGameOverScene()
