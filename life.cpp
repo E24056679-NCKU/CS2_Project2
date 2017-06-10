@@ -30,7 +30,7 @@ void Life_t::findTarget(Life_t *&response)
     emit request_FindTarget( dynamic_cast<Life_t*>(this) , tarTeam, response);
 }
 
-void Life_t::findAllTarget(QList<Life_t *> &response)
+void Life_t::findAllTarget(QList<Life_t *> &response, int SizeLimit)
 {
     LifeTeam tarTeam;
     if( this->Team == LifeTeam::MyTeam )
@@ -41,5 +41,5 @@ void Life_t::findAllTarget(QList<Life_t *> &response)
     // DBG
     tarTeam = LifeTeam::MyTeam;
 
-    emit request_FindAllTarget( dynamic_cast<Life_t*>(this) , tarTeam, response);
+    emit request_FindAllTarget( dynamic_cast<Life_t*>(this) , tarTeam, response, SizeLimit);
 }

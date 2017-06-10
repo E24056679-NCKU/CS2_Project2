@@ -13,6 +13,10 @@
 #include <QPixmap>
 #include <QImage>
 #include <QGraphicsSceneMouseEvent>
+#include <QPushButton>
+#include <QTextEdit>
+#include <QLabel>
+#include "account.h"
 #include "animation.h"
 #include "controller.h"
 #include "life.h"
@@ -40,6 +44,7 @@ private:
 // for BlackScreen and overriding mousePressEvent
 class MyQGraphicsScene : public QGraphicsScene
 {
+    friend class System;
     Q_OBJECT
 public:
     MyQGraphicsScene();
@@ -49,7 +54,7 @@ public slots:
     // rendering the BlackScreen(QImage) and update PixmapItem
     void updateBlackScreen();
     // !! Source's x and y must be floored
-    void renderFlashlightEffect(QImage &Image, QPointF Source, double Light_Theta, int R, double Rotate_Theta);
+    // void renderFlashlightEffect(QImage &Image, QPointF Source, double Light_Theta, int R, double Rotate_Theta);
 
 signals:
     void positionSelected(QPointF Position);
@@ -62,14 +67,72 @@ protected:
     const static int Hz = 20; // frequecy for updating BlackScreen, i.e., run updateBlackScreen()
 };
 
+// for all menu
+class MenuDisplay_t : public QObject
+{
+    friend class Display_t;
+    Q_OBJECT
+public:
+    MenuDisplay_t(QGraphicsView* ParentView);
+    ~MenuDisplay_t();
+
+    QGraphicsView* ParentView;
+    AccountManager_t* AccountManager;
+
+    QGraphicsScene* GameOverScene;
+
+    QGraphicsScene* LoginScene;
+    QPushButton* LoginScene_Button_Submit;
+    QPushButton* LoginScene_Button_Create;
+    QPushButton* LoginScene_Button_Rank;
+    QTextEdit* LoginScene_Input_Account;
+    QTextEdit* LoginScene_Input_Password;
+    QLabel* LoginScene_Label;
+
+
+    QGraphicsScene* RankScene;
+    QPushButton* RankScene_Button_LoginScene;
+
+
+    QGraphicsScene* CardManageScene;
+
+
+
+    void setupLoginScene();
+    void setupCardManageScene();
+    void setupGameOverScene();
+    void setupRankScene();
+
+public slots:
+    void changetoLoginScene();
+    void LoginScene_SubmitClicked();
+    void LoginScene_CreateClicked();
+    void LoginScene_RankClicked();
+
+    void changetoRankScene();
+    void RankScene_LoginSceneClicked();
+
+    void changetoCardManageScene();
+    void changetoGameOverScene();
+
+signals:
+    void setupCompleted();
+    void accountLogined(Account_t*);
+};
 
 class Display_t
 {
+    friend class System;
 public:
     Display_t();
     virtual ~Display_t();
 
-    void gameOver();
+    void setupGameScene();
+
+    void changetoGameScene();
+    void changetoLoginScene();
+    void changetoCardManageScene();
+    void changetoGameOverScene();
 
     void addItem(QGraphicsItem* Item);
     void removeItem(QGraphicsItem* Item);
@@ -77,10 +140,10 @@ public:
     void addAnimation(QPointF center, int period, QList<QString> &pathList);
 
 protected:
-    MyQGraphicsScene* Scene;
-    QGraphicsScene* GameOverScene;
+    MyQGraphicsScene* Scene; // GameScene
     QGraphicsView* View;
-    Button_t* Button[4];
+    Button_t* Button[4]; // GameButton
+    MenuDisplay_t* MenuDisplay;
 
 private:
 

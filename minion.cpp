@@ -81,7 +81,7 @@ Minion_t *MinionManager_t::addMinion(MinionType Type, MinionTeam Team, QPointF P
     newMinion->setPos( newMinion->Pos );
     connect(newMinion, SIGNAL(died(Minion_t*)), this, SLOT(receivedMinionDied(Minion_t*)));
     connect(newMinion, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(received_FindTarget(Life_t*,LifeTeam,Life_t*&)));
-    connect(newMinion, SIGNAL(request_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&)), this, SLOT(received_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&)));
+    connect(newMinion, SIGNAL(request_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&,int)), this, SLOT(received_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&,int)));
     connect(newMinion, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(receive_ArrowAttack(Life_t*,double,QPointF)));
     connect(newMinion, SIGNAL(request_Animation(QPointF,int,QList<QString>&)), this, SLOT(received_Animation(QPointF,int,QList<QString>&)));
     connect(newMinion, SIGNAL(request_RangeAttack(Life_t*,QPointF,double,double,LifeTeam)), this, SLOT(received_RangeAttack(Life_t*,QPointF,double,double,LifeTeam)));
@@ -108,9 +108,9 @@ void MinionManager_t::received_FindTarget(Life_t *requester, LifeTeam tarTeam, L
     emit request_FindTarget(requester, tarTeam, response);
 }
 
-void MinionManager_t::received_FindAllTarget(Life_t *requester, LifeTeam tarTeam, QList<Life_t *> &response)
+void MinionManager_t::received_FindAllTarget(Life_t *requester, LifeTeam tarTeam, QList<Life_t *> &response, int SizeLimit)
 {
-    emit request_FindAllTarget(requester, tarTeam, response);
+    emit request_FindAllTarget(requester, tarTeam, response, SizeLimit);
 }
 
 void MinionManager_t::receive_ArrowAttack(Life_t *target, double damage, QPointF pos)

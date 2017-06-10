@@ -1,12 +1,15 @@
 #include <QApplication>
 #include "system.h"
 
+#include "account.h"
+
 int main(int argc, char *argv[])
 {
     QApplication prog(argc, argv);
 
     System system(nullptr, nullptr);
-    system.BattleManager->addMinion(MinionType::DerivedMinion, MinionTeam::MyTeam, QPointF(400, 300));
+
+    // system.startGame();
 
 
     /*

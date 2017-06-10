@@ -2,13 +2,13 @@
 
 BattleManager_t::BattleManager_t() : QObject()
 {
-    CountDown = 30000; // (30000/100) s = 300s
+    CountDown = 300; // (30000/100) s = 300s
     Timer = new QTimer;
     connect(Timer, SIGNAL(timeout()), this, SLOT(countDown()));
 
     MinionManager = new MinionManager_t();
     connect(MinionManager, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(findLifeInRange(Life_t*,LifeTeam,Life_t*&)));
-    connect(MinionManager, SIGNAL(request_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&)), this, SLOT(findAllLifeInRange(Life_t*,LifeTeam,QList<Life_t*>&)));
+    connect(MinionManager, SIGNAL(request_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&,int)), this, SLOT(findAllLifeInRange(Life_t*,LifeTeam,QList<Life_t*>&,int)));
     connect(MinionManager, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(addArrow(Life_t*,double,QPointF)));
     connect(MinionManager, SIGNAL(request_Animation(QPointF,int,QList<QString>&)), this, SLOT(received_Animation(QPointF,int,QList<QString>&)));
     connect(MinionManager, SIGNAL(request_RangeAttack(Life_t*,QPointF,double,double,LifeTeam)), this, SLOT(rangeAttack(Life_t*,QPointF,double,double,LifeTeam)));
@@ -16,10 +16,10 @@ BattleManager_t::BattleManager_t() : QObject()
     TowerManager = new TowerManager_t();
     connect(TowerManager, SIGNAL(itemAdded(QGraphicsItem*)), this, SLOT(emit_ItemAdded(QGraphicsItem*)));
     connect(TowerManager, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(findLifeInRange(Life_t*,LifeTeam,Life_t*&)));
-    connect(TowerManager, SIGNAL(request_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&)), this, SLOT(findAllLifeInRange(Life_t*,LifeTeam,QList<Life_t*>&)));
+    connect(TowerManager, SIGNAL(request_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&,int)), this, SLOT(findAllLifeInRange(Life_t*,LifeTeam,QList<Life_t*>&,int)));
     connect(TowerManager, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(addArrow(Life_t*,double,QPointF)));
 
-    Timer->start(10);
+    // Timer->start(10);
 }
 
 BattleManager_t::~BattleManager_t()
@@ -186,7 +186,7 @@ void BattleManager_t::findLifeInRange(Life_t *requester, LifeTeam tarTeam, Life_
     }
 }
 
-void BattleManager_t::findAllLifeInRange(Life_t *requester, LifeTeam tarTeam, QList<Life_t*> &response)
+void BattleManager_t::findAllLifeInRange(Life_t *requester, LifeTeam tarTeam, QList<Life_t*> &response, int SizeLimit)
 {
         response.clear();
 
@@ -195,6 +195,9 @@ void BattleManager_t::findAllLifeInRange(Life_t *requester, LifeTeam tarTeam, QL
         // for each tower
         for(int i=0;i<6;++i)
         {
+            if( response.size() >= SizeLimit )
+                break;
+
             if( dynamic_cast<Tower_t*>(requester) != nullptr ) // if the requester is tower, leave this loop
                 break;
 
@@ -234,6 +237,9 @@ void BattleManager_t::findAllLifeInRange(Life_t *requester, LifeTeam tarTeam, QL
         // then each minion
         for(Minion_t* tar_ptr : this->MinionManager->MinionList)
         {
+            if( response.size() >= SizeLimit )
+                break;
+
             if( tar_ptr->Team != tarTeam || tar_ptr == requester )
                 continue;
 

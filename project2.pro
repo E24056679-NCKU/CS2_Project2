@@ -22,7 +22,8 @@ SOURCES += main.cpp \
     life.cpp \
     arrow.cpp \
     animation.cpp \
-    aicontroller.cpp
+    aicontroller.cpp \
+    account.cpp
 
 HEADERS  += \
     minion.h \
@@ -35,7 +36,8 @@ HEADERS  += \
     arrow.h \
     animation.h \
     miscellaneous.h \
-    aicontroller.h
+    aicontroller.h \
+    account.h
 
 FORMS    +=
 

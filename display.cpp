@@ -3,10 +3,20 @@
 
 Display_t::Display_t()
 {
+    View = new QGraphicsView();
+
+    MenuDisplay = new MenuDisplay_t(View);
+
+    this->setupGameScene();
+
+    this->changetoLoginScene();
+    View->show();
+}
+
+void Display_t::setupGameScene()
+{
     Scene = new MyQGraphicsScene();
     Scene->setSceneRect(0, 0, 800, 600);
-    View = new QGraphicsView(Scene);
-    View->show();
 
     // add four card button
     for(int i=0;i<4;++i)
@@ -16,22 +26,215 @@ Display_t::Display_t()
     }
 }
 
+MenuDisplay_t::MenuDisplay_t(QGraphicsView *ParentView)
+{
+    this->ParentView = ParentView;
+    this->setupCardManageScene();
+    this->setupGameOverScene();
+    this->setupLoginScene();
+    this->setupRankScene();
+}
+
+MenuDisplay_t::~MenuDisplay_t()
+{
+    delete CardManageScene;
+    delete GameOverScene;
+    delete LoginScene;
+}
+
+void MenuDisplay_t::setupLoginScene()
+{
+    LoginScene = new QGraphicsScene();
+    LoginScene->setSceneRect(0, 0, 800, 600);
+
+    this->LoginScene_Input_Account = new QTextEdit;
+    LoginScene->addWidget( this->LoginScene_Input_Account);
+    LoginScene_Input_Account->setGeometry(300, 200, 200, 75);
+
+    this->LoginScene_Input_Password = new QTextEdit;
+    LoginScene->addWidget( this->LoginScene_Input_Password);
+    LoginScene_Input_Password->setGeometry(300, 300, 200, 75);
+
+    this->LoginScene_Button_Rank = new QPushButton;
+    LoginScene->addWidget( this->LoginScene_Button_Rank );
+    LoginScene_Button_Rank->setGeometry(700, 0, 100, 50);
+    LoginScene_Button_Rank->setText("Rank");
+    connect(LoginScene_Button_Rank, SIGNAL(pressed()), this, SLOT(LoginScene_RankClicked()));
+
+    this->LoginScene_Button_Submit = new QPushButton;
+    LoginScene->addWidget( this->LoginScene_Button_Submit );
+    LoginScene_Button_Submit->setGeometry(350, 400, 100, 50);
+    LoginScene_Button_Submit->setText("Submit");
+    connect(LoginScene_Button_Submit, SIGNAL(pressed()), this, SLOT(LoginScene_SubmitClicked()));
+
+    this->LoginScene_Button_Create = new QPushButton;
+    LoginScene->addWidget( this->LoginScene_Button_Create );
+    LoginScene_Button_Create->setGeometry(350, 450, 100, 50);
+    LoginScene_Button_Create->setText("Create");
+    connect(LoginScene_Button_Create, SIGNAL(pressed()), this, SLOT(LoginScene_CreateClicked()));
+
+    this->LoginScene_Label = new QLabel;
+    LoginScene->addWidget( this->LoginScene_Label );
+    LoginScene_Label->setGeometry(250, 100, 300, 50);
+    LoginScene_Label->setText("HI");
+}
+
+void MenuDisplay_t::setupCardManageScene()
+{
+    CardManageScene = new QGraphicsScene;
+    CardManageScene->setSceneRect(0, 0, 800, 600);
+}
+
+void MenuDisplay_t::setupGameOverScene()
+{
+    GameOverScene = new QGraphicsScene;
+    GameOverScene->setSceneRect(0, 0, 800, 600);
+    GameOverScene->setBackgroundBrush( QBrush(QImage("./resources/images/GameOver.jpg")) );
+}
+
+void MenuDisplay_t::setupRankScene()
+{
+    RankScene = new QGraphicsScene;
+    RankScene->setSceneRect(0, 0, 800, 600);
+
+    this->RankScene_Button_LoginScene = new QPushButton();
+    RankScene->addWidget( RankScene_Button_LoginScene );
+    RankScene_Button_LoginScene->setGeometry(700, 0, 100, 50);
+    RankScene_Button_LoginScene->setText("Back");
+    connect(RankScene_Button_LoginScene, SIGNAL(pressed()), this, SLOT(RankScene_LoginSceneClicked()));
+}
+
+void Display_t::changetoGameScene()
+{
+    View->setScene( this->Scene );
+}
+
+void Display_t::changetoLoginScene()
+{
+    MenuDisplay->changetoLoginScene();
+}
+
+void Display_t::changetoCardManageScene()
+{
+    MenuDisplay->changetoCardManageScene();
+}
+
+void Display_t::changetoGameOverScene()
+{
+    MenuDisplay->changetoGameOverScene();
+}
+
+void MenuDisplay_t::changetoLoginScene()
+{
+    ParentView->setScene( this->LoginScene );
+}
+
+void MenuDisplay_t::LoginScene_SubmitClicked()
+{
+    QString username = LoginScene_Input_Account->toPlainText();
+    QString password = LoginScene_Input_Password->toPlainText();
+
+    Account_t* findRes = AccountManager->selectAccount( username );
+    if( findRes == nullptr )
+    {
+        this->LoginScene_Label->setText("Wrong Username or Password");
+        return;
+    }
+    else if( findRes->Password != password )
+    {
+        this->LoginScene_Label->setText("Wrong Username or Password");
+        return;
+    }
+    this->LoginScene_Label->setText("Login Succeeded");
+    emit accountLogined(findRes);
+    this->changetoCardManageScene();
+}
+
+void MenuDisplay_t::LoginScene_CreateClicked()
+{
+    QString username = LoginScene_Input_Account->toPlainText();
+    QString password = LoginScene_Input_Password->toPlainText();
+
+    if(username.contains(' ') || password.contains(' '))
+    {
+        this->LoginScene_Label->setText("Invalid Username or Password");
+        return;
+    }
+    else if( AccountManager->selectAccount(username) != nullptr )
+    {
+        this->LoginScene_Label->setText("Account Already Exist");
+        return;
+    }
+
+    int card[6] = {0, 0, 0, 0, 0, 0};
+    Account_t newAccount( username, password, 100, card);
+    AccountManager->addAccount(newAccount);
+    this->LoginScene_Label->setText("Account Created");
+}
+
+void MenuDisplay_t::LoginScene_RankClicked()
+{
+    this->changetoRankScene();
+}
+
+void MenuDisplay_t::changetoRankScene()
+{
+    static QList<QLabel*> LabelList;
+    for(auto &i : LabelList)
+        delete i;
+    LabelList.clear();
+
+    QMultiMap<int, QString> UserList;
+    for(auto &i : AccountManager->AccountList)
+    {
+        UserList.insert( i->Money , i->Username );
+    }
+
+    int idx = 0;
+    for(auto it = UserList.end() ; it != UserList.begin() ; )
+    {
+        --it;
+        QLabel* newLabel1 = new QLabel;
+        this->RankScene->addWidget(newLabel1);
+        newLabel1->setText( it.value());
+        newLabel1->setGeometry(20, 20*idx+20, 500, 15);
+
+        QLabel* newLabel2 = new QLabel;
+        this->RankScene->addWidget(newLabel2);
+        newLabel2->setText( QString::number(it.key()) );
+        newLabel2->setGeometry(300, 20*idx+20, 200, 15);
+
+        LabelList.push_back(newLabel1);
+        LabelList.push_back(newLabel2);
+        idx++;
+    }
+    ParentView->setScene( this->RankScene );
+}
+
+void MenuDisplay_t::RankScene_LoginSceneClicked()
+{
+    this->changetoLoginScene();
+}
+
+void MenuDisplay_t::changetoCardManageScene()
+{
+
+    ParentView->setScene( this->CardManageScene );
+}
+
+void MenuDisplay_t::changetoGameOverScene()
+{
+    ParentView->setScene( this->GameOverScene );
+}
+
 Display_t::~Display_t()
 {
     delete Scene;
     delete View;
+    delete MenuDisplay;
     for(int i=0;i<4;++i)
-        delete Button[i];
-}
-
-void Display_t::gameOver()
-{
-    View->setScene(nullptr);
-    delete Scene;
-    GameOverScene = new QGraphicsScene;
-    GameOverScene->setSceneRect(0, 0, 800, 600);
-    GameOverScene->setBackgroundBrush( QBrush(QImage("./resources/images/GameOver.jpg")) );
-    View->setScene(GameOverScene);
+        if( Button[i] != nullptr )
+            delete Button[i];
 }
 
 void Display_t::addItem(QGraphicsItem *Item)
@@ -181,6 +384,7 @@ void MyQGraphicsScene::updateBlackScreen()
     BlackScreenItem->setPixmap( QPixmap::fromImage(*BlackScreen) );
 }
 
+/*
 void MyQGraphicsScene::renderFlashlightEffect(QImage &Image, QPointF Source, double Light_Theta, int LightLen, double Rotate_Theta)
 {
     int ImageWidth = Image.width();
@@ -196,6 +400,7 @@ void MyQGraphicsScene::renderFlashlightEffect(QImage &Image, QPointF Source, dou
 
 
 }
+*/
 
 void MyQGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {

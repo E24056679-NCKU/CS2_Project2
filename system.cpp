@@ -41,19 +41,39 @@ System::System(ControllerSlot_t* Controller1 = nullptr, ControllerSlot_t* Contro
     connect(BattleManager, SIGNAL(request_Animation(QPointF,int,QList<QString>&)), this, SLOT(addAnimation(QPointF,int,QList<QString>&)));
     // not until now can item created by BattleManager be added to scene
     BattleManager->initialize(); // for initializing towers
+
+    AccountManager = new AccountManager_t;
+    Display->MenuDisplay->AccountManager = AccountManager;
+    connect(Display->MenuDisplay, SIGNAL(setupCompleted()), this, SLOT(startGame()));
+    connect(Display->MenuDisplay, SIGNAL(accountLogined(Account_t*)), this, SLOT(setAccount(Account_t*)));
 }
 
 System::~System()
 {
+    delete AccountManager;
     delete BattleManager;
     delete Display;
     // ControllerSlot[] is not built in this class, it shouldn't be deleted here
 }
 
+void System::setAccount(Account_t* account)
+{
+    this->Account = account;
+}
+
+void System::startGame()
+{
+    Display->changetoGameScene();
+    BattleManager->Timer->start(10); // start game
+
+    //DBG
+    BattleManager->addMinion(MinionType::DerivedMinion, MinionTeam::MyTeam, QPointF(400, 300));
+}
+
 void System::receivedGameOver()
 {
     delete BattleManager; // must be delete first
-    Display->gameOver();
+    Display->changetoGameOverScene();
 }
 
 void System::itemAdded(QGraphicsItem *addItem)

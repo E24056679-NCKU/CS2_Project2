@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDebug>
+#include "account.h"
 #include "display.h"
 #include "minion.h"
 #include "battle.h"
@@ -23,6 +24,9 @@ public:
     ~System();
 
 protected slots:
+    void setAccount(Account_t* account);
+
+    void startGame();
     void receivedGameOver();
 
     // add/remove item to Display
@@ -42,6 +46,9 @@ protected slots:
     void addAnimation(QPointF center, int period, QList<QString> &pathList);
 
 protected:
+    AccountManager_t* AccountManager;
+    Account_t* Account;
+
     // BattleManager arrange all things about the battlefield
     BattleManager_t* BattleManager;
     // Display arrange all things about display, but only add or remove IMAGE, and mouseClickEvent
