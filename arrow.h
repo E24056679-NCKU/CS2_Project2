@@ -5,6 +5,7 @@
 #include <QGraphicsPixmapItem>
 #include <QTimer>
 #include <QtMath>
+#include "miscellaneous.h"
 #include "life.h"
 
 class Arrow_t : public QObject, public QGraphicsPixmapItem

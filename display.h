@@ -1,7 +1,9 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
+#include <cmath>
 #include <algorithm>
+#include <complex>
 #include <QObject>
 #include <QSet>
 #include <QGraphicsView>
@@ -15,6 +17,7 @@
 #include "controller.h"
 #include "life.h"
 #include "minion.h"
+#include "miscellaneous.h"
 
 // Button at the downside of screen
 class Button_t : public QObject, public QGraphicsPixmapItem
@@ -45,6 +48,8 @@ public:
 public slots:
     // rendering the BlackScreen(QImage) and update PixmapItem
     void updateBlackScreen();
+    // !! Source's x and y must be floored
+    void renderFlashlightEffect(QImage &Image, QPointF Source, double Light_Theta, int R, double Rotate_Theta);
 
 signals:
     void positionSelected(QPointF Position);
@@ -54,7 +59,7 @@ protected:
     QImage* BlackScreen;
     QGraphicsPixmapItem* BlackScreenItem;
     QTimer* Timer; // for updating BlackScreen
-    const static int Hz = 20; // frequecy of updating BlackScreen, i.e., run updateBlackScreen()
+    const static int Hz = 20; // frequecy for updating BlackScreen, i.e., run updateBlackScreen()
 };
 
 
@@ -64,13 +69,16 @@ public:
     Display_t();
     virtual ~Display_t();
 
+    void gameOver();
+
     void addItem(QGraphicsItem* Item);
     void removeItem(QGraphicsItem* Item);
 
-    void addAnimation(QPointF center, int ms, QList<QString> &pathList);
+    void addAnimation(QPointF center, int period, QList<QString> &pathList);
 
 protected:
     MyQGraphicsScene* Scene;
+    QGraphicsScene* GameOverScene;
     QGraphicsView* View;
     Button_t* Button[4];
 

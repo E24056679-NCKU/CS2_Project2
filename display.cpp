@@ -24,6 +24,16 @@ Display_t::~Display_t()
         delete Button[i];
 }
 
+void Display_t::gameOver()
+{
+    View->setScene(nullptr);
+    delete Scene;
+    GameOverScene = new QGraphicsScene;
+    GameOverScene->setSceneRect(0, 0, 800, 600);
+    GameOverScene->setBackgroundBrush( QBrush(QImage("./resources/images/GameOver.jpg")) );
+    View->setScene(GameOverScene);
+}
+
 void Display_t::addItem(QGraphicsItem *Item)
 {
     Scene->addItem(Item);
@@ -34,9 +44,9 @@ void Display_t::removeItem(QGraphicsItem *Item)
     Scene->removeItem(Item);
 }
 
-void Display_t::addAnimation(QPointF center, int ms, QList<QString> &pathList)
+void Display_t::addAnimation(QPointF center, int period, QList<QString> &pathList)
 {
-    this->addItem( dynamic_cast<QGraphicsItem*>(new Animation_t(center, ms, pathList)) );
+    this->addItem( dynamic_cast<QGraphicsItem*>(new Animation_t(center, period, pathList)) );
 }
 
 ControllableDisplay_t::ControllableDisplay_t()
@@ -71,7 +81,7 @@ void Minion_t::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 Button_t::Button_t(int _ID) : ID(_ID)
 {
-    this->setPixmap(QPixmap("./resources/images/Button.png"));
+    this->setPixmap(QPixmap("./resources/images/Button.jpg"));
     this->setPos(_ID*200, 500);
     this->setZValue(1);
 }
@@ -102,32 +112,53 @@ MyQGraphicsScene::MyQGraphicsScene()
 MyQGraphicsScene::~MyQGraphicsScene()
 {
     delete BlackScreen;
+    delete BlackScreenItem;
 }
 
 void MyQGraphicsScene::updateBlackScreen()
 {
-    BlackScreen->fill(QColor(0, 0, 0, 100)); // completely black
+    BlackScreen->fill( QColor(0, 0, 0, 100) ); // completely black
     for(auto &item_ptr : QGraphicsScene::items()) // for each item in QGraphcisScene
     {
+        int transparency = 0;
         // Minion can lighten dark area
         Life_t* life = dynamic_cast<Life_t*>(item_ptr);
-        if(life != nullptr && life->Team == LifeTeam::MyTeam) // if the item is a Minion
+        if(life != nullptr && life->Team == LifeTeam::MyTeam) // if the item is a Life
         {
-            int lb = std::max(0.0, life->Center.x() - 100); // left bound
-            int rb = std::min(799.0, life->Center.x() + 100); // right
-            int ub = std::max(0.0, life->Center.y() - 100); // up
-            int db = std::min(599.0, life->Center.y() + 100); // down
+            //renderFlashlightEffect(*BlackScreen, life->Center, M_PI/6, 100, 0);
 
-            for(int i=lb;i<=rb;++i)
+
+            int newCenter_X = life->Center.x() + life->pixmap().size().width()/4;
+            int lb = std::max(0.0, 1.0*newCenter_X - 200.0); // left bound
+            int rb = std::min(799.0, 1.0*newCenter_X + 200.0); // right
+            int ub = std::max(0.0, life->Center.y() - 200.0); // up
+            int db = std::min(599.0, life->Center.y() + 200.0); // down
+
+            int widthOver4 = life->pixmap().size().width() >> 2;
+            for(int i=ub;i<=db;++i) // row (y)
             {
-                for(int j=ub;j<=db;++j)
+                int y = i - life->Center.y();
+                int yTimes3 = y*3;
+                QRgb* pixel = reinterpret_cast<QRgb*>(BlackScreen->scanLine(i));
+                pixel += lb;
+                for(int j=lb ; j<=rb ; ++j , ++pixel) // column (x)
                 {
-                    BlackScreen->setPixelColor(i, j, QColor(255, 255, 255, 0)); // transparent
+                    int x = j - (newCenter_X);
+                    if( x < widthOver4)
+                        continue;
+                    if( y >= 0 && x < yTimes3 )
+                        continue;
+                    if( y < 0 && x < -yTimes3 )
+                        continue;
+                    transparency = std::min(255.0, std::max(0.0, 0.006375*x*x + (*pixel>>24) - 255.0)); // 0.006375 = 255.0/40000
+                    *pixel = (transparency << 24);
                 }
             }
+
         }
 
         // Animation can lighten dark area
+        transparency = 0;
         Animation_t* ani = dynamic_cast<Animation_t*>(item_ptr);
         if(ani != nullptr) // if the item is a Animation
         {
@@ -136,16 +167,34 @@ void MyQGraphicsScene::updateBlackScreen()
             int ub = std::max(0.0, ani->Center.y() - 100); // up
             int db = std::min(599.0, ani->Center.y() + 100); // down
 
-            for(int i=lb;i<=rb;++i)
+            for(int i=ub;i<=db;++i)
             {
-                for(int j=ub;j<=db;++j)
+                QRgb* pixel = reinterpret_cast<QRgb*>(BlackScreen->scanLine(i));
+                pixel += lb;
+                for(int j=lb ; j<=rb ; ++j, ++pixel)
                 {
-                    BlackScreen->setPixelColor(i, j, QColor(255, 255, 255, 0)); // transparent
+                    *pixel = 0x00FFFFFF;
                 }
             }
         }
     }
     BlackScreenItem->setPixmap( QPixmap::fromImage(*BlackScreen) );
+}
+
+void MyQGraphicsScene::renderFlashlightEffect(QImage &Image, QPointF Source, double Light_Theta, int LightLen, double Rotate_Theta)
+{
+    int ImageWidth = Image.width();
+    int ImageHeight = Image.height();
+    int k = 255.0 / (LightLen*LightLen); // illumination constant
+    // transparency = std::min(255.0, std::max(0.0, k*x*x + (*pixel>>24) - 255.0));
+
+
+    std::complex<double> A_comp( LightLen / std::cos(Light_Theta), 0.0);
+    std::complex<double> B_comp( LightLen / std::cos(Light_Theta), 0.0);
+    A_comp *= std::polar(1.0,  Light_Theta + Rotate_Theta);
+    B_comp *= std::polar(1.0, -Light_Theta + Rotate_Theta);
+
+
 }
 
 void MyQGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)

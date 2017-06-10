@@ -81,11 +81,11 @@ void TowerManager_t::initializeTowers()
         TowerList[i] = new Tower_t();
         if(i % 3) // normal tower
         {
-            TowerList[i]->setPixmap(QPixmap("./resources/images/Tower.png"));
+            TowerList[i]->setPixmap(QPixmap("./resources/images/Tower.jpg"));
         }
         else
         {
-            TowerList[i]->setPixmap(QPixmap("./resources/images/MainTower.png"));
+            TowerList[i]->setPixmap(QPixmap("./resources/images/MainTower.jpg"));
         }
         emit itemAdded( dynamic_cast<QGraphicsItem*>(TowerList[i]) );
     }

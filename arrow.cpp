@@ -7,7 +7,7 @@ Arrow_t::Arrow_t(Life_t *_Target, double _Damage, QPointF _Pos) : QObject(), QGr
     this->setParent(_Target); // if the Target is deleted, this arrow should be deleted too
     Target = _Target;
     this->setPos(this->Pos);
-    this->setPixmap( QPixmap("./resources/images/Arrow.png") );
+    this->setPixmap( QPixmap("./resources/images/Arrow.jpg") );
     Timer = new QTimer();
     connect(Timer, SIGNAL(timeout()), this, SLOT(timerTick()));
     this->Timer->start(1000 / Hz);
@@ -30,7 +30,7 @@ void Arrow_t::timerTick()
         // this arrow will change its direction when the targets' position changed
         // calculate next velocity vector
         QPointF Vec_ThisToTar = QPointF(Target->Center.x() - this->Pos.x() , Target->Center.y() - this->Pos.y());
-        double Vec_ThisToTar_Len = qSqrt(Vec_ThisToTar.x()*Vec_ThisToTar.x() + Vec_ThisToTar.y()*Vec_ThisToTar.y());
+        double Vec_ThisToTar_Len = distance(QPointF(0, 0), Vec_ThisToTar);
         QPointF Velocity = Speed * Vec_ThisToTar / Vec_ThisToTar_Len; // = UnitVec * speed, it's a vector
         this->Pos += Velocity;
         this->setPos(this->Pos);

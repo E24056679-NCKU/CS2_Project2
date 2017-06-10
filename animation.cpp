@@ -1,6 +1,6 @@
 #include "animation.h"
 
-Animation_t::Animation_t(QPointF center, int ms, QList<QString> &pathList)
+Animation_t::Animation_t(QPointF center, int period, QList<QString> &pathList)
 {
     this->Center = center;
     Timer = new QTimer;
@@ -12,7 +12,7 @@ Animation_t::Animation_t(QPointF center, int ms, QList<QString> &pathList)
     this->setPos(pos);
 
     connect(Timer, SIGNAL(timeout()), this, SLOT(nextImage()));
-    Timer->start(ms);
+    Timer->start(period);
 }
 
 Animation_t::~Animation_t()

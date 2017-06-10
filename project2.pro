@@ -21,7 +21,8 @@ SOURCES += main.cpp \
     tower.cpp \
     life.cpp \
     arrow.cpp \
-    animation.cpp
+    animation.cpp \
+    aicontroller.cpp
 
 HEADERS  += \
     minion.h \
@@ -32,7 +33,9 @@ HEADERS  += \
     tower.h \
     life.h \
     arrow.h \
-    animation.h
+    animation.h \
+    miscellaneous.h \
+    aicontroller.h
 
 FORMS    +=
 

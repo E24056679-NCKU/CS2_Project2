@@ -8,9 +8,7 @@
 #include "minion.h"
 #include "tower.h"
 #include "arrow.h"
-
-double distance(const QPointF &a, const QPointF &b);
-double crossProduct(const QPointF &refP, QPointF p1, QPointF p2);
+#include "miscellaneous.h"
 
 class BattleManager_t : public QObject
 {
@@ -21,6 +19,8 @@ public:
     void initialize();
 
 public slots:
+    void countDown();
+
     // these two functions are for user to add/remove minion
     void addMinion(MinionType Type, MinionTeam Group, QPointF Position);
     void removeMinion(Minion_t* rmMinion);
@@ -47,19 +47,23 @@ public slots:
     void addArrow(Life_t* target, double damage, QPointF pos);
 
     // forward to System
-    void received_Animation(QPointF center, int ms, QList<QString> &pathList);
+    void received_Animation(QPointF center, int period, QList<QString> &pathList);
 
     void rangeAttack(Life_t* requester, QPointF center, double range, double damage, LifeTeam targetTeam);
 
 signals:
+    void gameOver();
     // tell System an item has been created
     void itemAdded(QGraphicsItem* addItem);
     // tell System an item has been removed
     void itemRemoved(QGraphicsItem* rmItem);
     // forward to System
-    void request_Animation(QPointF center, int ms, QList<QString> &pathList);
+    void request_Animation(QPointF center, int period, QList<QString> &pathList);
 
 protected:
+    QTimer* Timer;
+    int CountDown;
+
     MinionManager_t* MinionManager;
     TowerManager_t* TowerManager;
 

@@ -14,7 +14,7 @@ class Animation_t : public QObject, public QGraphicsPixmapItem
 {
     Q_OBJECT
 public:
-    Animation_t(QPointF center, int ms, QList<QString> &pathList); // each image lasts ms milliseconds, pathList stores the path of each image
+    Animation_t(QPointF center, int period, QList<QString> &pathList); // each image lasts period milliseconds, pathList stores the path of each image
     ~Animation_t();
     QPointF Center; // the fixed center of this animation
 

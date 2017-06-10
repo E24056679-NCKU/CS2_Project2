@@ -2,6 +2,10 @@
 
 BattleManager_t::BattleManager_t() : QObject()
 {
+    CountDown = 30000; // (30000/100) s = 300s
+    Timer = new QTimer;
+    connect(Timer, SIGNAL(timeout()), this, SLOT(countDown()));
+
     MinionManager = new MinionManager_t();
     connect(MinionManager, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(findLifeInRange(Life_t*,LifeTeam,Life_t*&)));
     connect(MinionManager, SIGNAL(request_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&)), this, SLOT(findAllLifeInRange(Life_t*,LifeTeam,QList<Life_t*>&)));
@@ -15,10 +19,12 @@ BattleManager_t::BattleManager_t() : QObject()
     connect(TowerManager, SIGNAL(request_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&)), this, SLOT(findAllLifeInRange(Life_t*,LifeTeam,QList<Life_t*>&)));
     connect(TowerManager, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(addArrow(Life_t*,double,QPointF)));
 
+    Timer->start(10);
 }
 
 BattleManager_t::~BattleManager_t()
 {
+    delete Timer;
     delete MinionManager;
     delete TowerManager;
 }
@@ -26,6 +32,16 @@ BattleManager_t::~BattleManager_t()
 void BattleManager_t::initialize()
 {
     TowerManager->initializeTowers();
+}
+
+void BattleManager_t::countDown()
+{
+    --CountDown;
+    if(CountDown == 0)
+    {
+        Timer->stop();
+        emit gameOver();
+    }
 }
 
 void BattleManager_t::emit_ItemAdded(QGraphicsItem *addItem)
@@ -43,9 +59,9 @@ void BattleManager_t::addArrow(Life_t *target, double damage, QPointF pos)
     itemAdded( dynamic_cast<QGraphicsItem*>(new Arrow_t(target, damage, pos)) );
 }
 
-void BattleManager_t::received_Animation(QPointF center, int ms, QList<QString> &pathList)
+void BattleManager_t::received_Animation(QPointF center, int period, QList<QString> &pathList)
 {
-    emit request_Animation(center, ms, pathList);
+    emit request_Animation(center, period, pathList);
 }
 
 void BattleManager_t::rangeAttack(Life_t* requester, QPointF center, double range, double damage, LifeTeam targetTeam)
@@ -108,20 +124,6 @@ void BattleManager_t::addMinion(MinionType Type, MinionTeam Group, QPointF Posit
 void BattleManager_t::removeMinion(Minion_t *rmMinion)
 {
     MinionManager->removeMinion(rmMinion);
-}
-
-inline double distance(const QPointF &a, const QPointF &b)
-{
-    double dx = a.x() - b.x();
-    double dy = a.y() - b.y();
-    return std::sqrt(dx*dx+dy*dy);
-}
-
-inline double crossProduct(const QPointF &refP, QPointF p1, QPointF p2)
-{
-    p1 -= refP;
-    p2 -= refP;
-    return p1.x()*p2.y() - p1.y()*p2.x();
 }
 
 void BattleManager_t::findLifeInRange(Life_t *requester, LifeTeam tarTeam, Life_t* &response)
@@ -279,16 +281,33 @@ void BattleManager_t::receivedSignal1_SelectCard(int CardID)
 
 void BattleManager_t::receivedSignal2_SelectPosition(QPointF Position)
 {
+    if(CardSelected_Player2 == -1 && MinionSelected_Player2 != nullptr)
+    {
 
+    }
+    else if(CardSelected_Player2!= -1 && MinionSelected_Player2 == nullptr)
+    {
+        // create new minion
+
+        // DBG
+        // these two lines are used to test connection with ControllableDisplay
+        qDebug() << "BM, sig2, pos, DBG";
+        this->addMinion( MinionType::DerivedMinion , MinionTeam::OpsTeam, Position);
+
+
+        // !! recover this line, this->addMinion( CardtoMinionType_Player1[CardSelected_Player1] , MinionTeam::MyTeam, Position);
+    }
 }
 
 void BattleManager_t::receivedSignal2_SelectMinion(Minion_t *selMinion)
 {
+    qDebug() << "BM, sig1, selMini, DBG";
     CardSelected_Player2 = -1;
     MinionSelected_Player2 = selMinion;
 }
 
 void BattleManager_t::receivedSignal2_SelectCard(int CardID)
 {
-
+    MinionSelected_Player2 = nullptr;
+    CardSelected_Player2 = CardID;
 }

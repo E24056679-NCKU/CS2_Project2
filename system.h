@@ -8,6 +8,7 @@
 #include "battle.h"
 #include "controller.h"
 #include "tower.h"
+#include "aicontroller.h"
 
 // for maintaining game , hold minion's container ...
 class System : public QObject
@@ -22,6 +23,8 @@ public:
     ~System();
 
 protected slots:
+    void receivedGameOver();
+
     // add/remove item to Display
     void itemAdded(QGraphicsItem* addItem);
     void itemRemoved(QGraphicsItem* rmItem);
@@ -36,7 +39,7 @@ protected slots:
     void receivedSignal2_SelectCard(int CardID);
 
     // forward to Display
-    void addAnimation(QPointF center, int ms, QList<QString> &pathList);
+    void addAnimation(QPointF center, int period, QList<QString> &pathList);
 
 protected:
     // BattleManager arrange all things about the battlefield
@@ -49,6 +52,7 @@ protected:
 private:
     // store the address of ControllableDisplay (if any)
     ControllableDisplay_t* ControllableDisplay;
+    AIController_t* AIController;
 };
 
 #endif // SYSTEM_H

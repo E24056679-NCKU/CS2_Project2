@@ -17,29 +17,25 @@ System::System(ControllerSlot_t* Controller1 = nullptr, ControllerSlot_t* Contro
     // connect Controller
     connect(ControllerSlot[0], SIGNAL(receivedSignal_SelectCard(int)), this, SLOT(receivedSignal1_SelectCard(int)));
     connect(ControllerSlot[0], SIGNAL(receivedSignal_SelectMinion(Minion_t*)), this, SLOT(receivedSignal1_SelectMinion(Minion_t*)));
-    //connect(ControllerSlot[0], SIGNAL(receivedSignal_SelectMinion(QPointF)), this, SLOT(receivedSignal1_SelectMinion(QPointF)));
     connect(ControllerSlot[0], SIGNAL(receivedSignal_SelectPosition(QPointF)), this, SLOT(receivedSignal1_SelectPosition(QPointF)));
 
     if(Controller2 == nullptr)
     {
-
+        AIController = new AIController_t;
+        ControllerSlot[1] = dynamic_cast<ControllerSlot_t*>(AIController);
     }
     else
     {
+        AIController = nullptr;
         ControllerSlot[1] = Controller1;
     }
     // connect controller
-    /*
     connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectCard(int)), this, SLOT(receivedSignal1_SelectCard(int)));
     connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectMinion(Minion_t*)), this, SLOT(receivedSignal1_SelectMinion(Minion_t*)));
-    // connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectMinion(QPointF)), this, SLOT(receivedSignal1_SelectMinion(QPointF)));
     connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectPosition(QPointF)), this, SLOT(receivedSignal1_SelectPosition(QPointF)));
-    */
-
-    // connect ...
-
 
     BattleManager = new BattleManager_t();
+    connect(BattleManager, SIGNAL(gameOver()), this, SLOT(receivedGameOver()));
     connect(BattleManager, SIGNAL(itemAdded(QGraphicsItem*)), this, SLOT(itemAdded(QGraphicsItem*)));
     connect(BattleManager, SIGNAL(itemRemoved(QGraphicsItem*)), this, SLOT(itemRemoved(QGraphicsItem*)));
     connect(BattleManager, SIGNAL(request_Animation(QPointF,int,QList<QString>&)), this, SLOT(addAnimation(QPointF,int,QList<QString>&)));
@@ -52,6 +48,12 @@ System::~System()
     delete BattleManager;
     delete Display;
     // ControllerSlot[] is not built in this class, it shouldn't be deleted here
+}
+
+void System::receivedGameOver()
+{
+    delete BattleManager; // must be delete first
+    Display->gameOver();
 }
 
 void System::itemAdded(QGraphicsItem *addItem)
@@ -103,7 +105,7 @@ void System::receivedSignal2_SelectCard(int CardID)
     BattleManager->receivedSignal2_SelectCard(CardID);
 }
 
-void System::addAnimation(QPointF center, int ms, QList<QString> &pathList)
+void System::addAnimation(QPointF center, int period, QList<QString> &pathList)
 {
-    Display->addAnimation(center, ms, pathList);
+    Display->addAnimation(center, period, pathList);
 }

@@ -118,9 +118,9 @@ void MinionManager_t::receive_ArrowAttack(Life_t *target, double damage, QPointF
     emit emit_ArrowAttack(target, damage, pos);
 }
 
-void MinionManager_t::received_Animation(QPointF center, int ms, QList<QString> &pathList)
+void MinionManager_t::received_Animation(QPointF center, int period, QList<QString> &pathList)
 {
-    emit request_Animation(center, ms, pathList);
+    emit request_Animation(center, period, pathList);
 }
 
 void MinionManager_t::received_RangeAttack(Life_t *requester, QPointF center, double range, double damage, LifeTeam targetTeam)
@@ -138,17 +138,17 @@ DerivedMinion_t::DerivedMinion_t() : Minion_t()
 {
     if( DerivedMinion_t::BasicImage == nullptr ) // construct Pixmaps if they haven't been constructed
     {
-        DerivedMinion_t::BasicImage = new QPixmap("./resources/images/DerivedMinion.png");
+        DerivedMinion_t::BasicImage = new QPixmap("./resources/images/DerivedMinion.jpg");
 
         // import moving images
         for( int i=1 ; i<=0 ; ++i )
         {
-            DerivedMinion_t::MovingImages.push_back( new QPixmap( QString("./resources/images/DerivedMinion_move_") + i + ".png" ) );
+            DerivedMinion_t::MovingImages.push_back( new QPixmap( QString("./resources/images/DerivedMinion_move_") + i + ".jpg" ) );
         }
 
         // import attacking images
         for( int i=1 ; i<=0 ; ++i)
-            DerivedMinion_t::AttackingImages.push_back( new QPixmap( QString("./resources/images/DerivedMinion_attack_") + i + ".png" ) );
+            DerivedMinion_t::AttackingImages.push_back( new QPixmap( QString("./resources/images/DerivedMinion_attack_") + i + ".jpg" ) );
     }
     this->setPixmap( * (this->BasicImage) );
 
