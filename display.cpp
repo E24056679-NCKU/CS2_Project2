@@ -233,6 +233,31 @@ void MenuDisplay_t::setupBlackJackScene()
 {
     BlackJackScene = new QGraphicsScene;
     BlackJackScene->setSceneRect(0, 0, 800, 600);
+
+    this->BlackJackScene_Button_Back = new QPushButton;
+    BlackJackScene->addWidget( this->BlackJackScene_Button_Back );
+    BlackJackScene_Button_Back->setGeometry(700, 0, 100, 50);
+    BlackJackScene_Button_Back->setText("Back");
+    connect(BlackJackScene_Button_Back, SIGNAL(pressed()), this, SLOT(BlackJackScene_BackClicked()));
+
+    this->BlackJackScene_Label_Money = new QLabel;
+    BlackJackScene->addWidget( this->BlackJackScene_Label_Money );
+    BlackJackScene_Label_Money->setGeometry(10, 10, 500, 25);
+    BlackJackScene_Label_Money->setText("Money");
+
+    this->BlackJackScene_Button_StartEnd = new QPushButton;
+    BlackJackScene->addWidget( this->BlackJackScene_Button_StartEnd );
+    BlackJackScene_Button_StartEnd->setGeometry(700, 500, 100, 50);
+    BlackJackScene_Button_StartEnd->setText("Start\r\n50$");
+    connect(BlackJackScene_Button_StartEnd, SIGNAL(pressed()), this, SLOT(BlackJackScene_StartEndClicked()));
+
+    this->BlackJackScene_Button_MoreCard = new QPushButton;
+    BlackJackScene->addWidget( this->BlackJackScene_Button_MoreCard );
+    BlackJackScene_Button_MoreCard->setGeometry(700, 300, 100, 50);
+    BlackJackScene_Button_MoreCard->setText("MoreCard");
+    BlackJackScene_Button_MoreCard->setEnabled(0);
+    connect(BlackJackScene_Button_MoreCard, SIGNAL(pressed()), this, SLOT(BlackJackScene_MoreCardClicked()));
+
 }
 
 void Display_t::changetoGameScene()
@@ -646,7 +671,77 @@ void MenuDisplay_t::changetoGameOverScene()
 
 void MenuDisplay_t::changetoBlackJackScene()
 {
+    BlackJackScene_Label_Money->setText( QString::number(Account->Money) );
     ParentView->setScene( this->BlackJackScene );
+}
+
+void MenuDisplay_t::BlackJackScene_BackClicked()
+{
+    changetoCardBuyScene();
+}
+
+void MenuDisplay_t::BlackJackScene_StartEndClicked()
+{
+    if( BlackJackScene_Button_StartEnd->text() == "Start\r\n50$" )
+    {
+        if( Account->Money < 50 )
+        {
+            BlackJackScene_Label_Money->setText("Too Poor, Poor You, QQ");
+            return;
+        }
+        Account->Money -= 50;
+        AccountManager->saveFile();
+        if( BlackJackGame != nullptr )
+            delete BlackJackGame;
+        for(auto &i : BlackJackScene_PixmapItem_CardList)
+            delete i;
+        BlackJackScene_PixmapItem_CardList.clear();
+
+        BlackJackGame = new BlackJack_t;
+
+        BlackJackScene_Button_StartEnd->setText( "End" );
+        BlackJackScene_Button_MoreCard->setEnabled(1);
+
+        changetoBlackJackScene();
+    }
+    else
+    {
+        int player2_sum = 0;
+        int cardcnt = 0;
+        while( player2_sum < 14 )
+        {
+            QPair<int, char> card = BlackJackGame->giveCard( BlackJack_t::Player2 );
+            player2_sum += card.first;
+            QGraphicsPixmapItem* newItem = new QGraphicsPixmapItem( QPixmap( QString("./resources/images/pokers/") + QString::number(card.first) + "_" +  card.second + ".jpg") );
+            newItem->setScale(0.3);
+            newItem->setPos(20 + 100*cardcnt, 100);
+            BlackJackScene_PixmapItem_CardList.push_back( newItem );
+            BlackJackScene->addItem( newItem );
+            cardcnt++;
+        }
+        int winner = BlackJackGame->judge();
+        if(winner == 0)
+            Account->Money += 50;
+        else if( winner == BlackJack_t::Player1 )
+            Account->Money += 100;
+        AccountManager->saveFile();
+        BlackJackScene_Button_StartEnd->setText( "Start\r\n50$" );
+        BlackJackScene_Button_MoreCard->setEnabled(0);
+
+        changetoBlackJackScene();
+    }
+}
+
+void MenuDisplay_t::BlackJackScene_MoreCardClicked()
+{
+    if( BlackJackScene_PixmapItem_CardList.size() >= 5 )
+        return;
+    QPair<int, char> card = BlackJackGame->giveCard( BlackJack_t::Player1 );
+    QGraphicsPixmapItem* newItem = new QGraphicsPixmapItem( QPixmap( QString("./resources/images/pokers/") + QString::number(card.first) + "_" +  card.second + ".jpg") );
+    newItem->setScale(0.3);
+    newItem->setPos(20 + 100*BlackJackScene_PixmapItem_CardList.size(), 400);
+    BlackJackScene_PixmapItem_CardList.push_back( newItem );
+    BlackJackScene->addItem( newItem );
 }
 
 Display_t::~Display_t()

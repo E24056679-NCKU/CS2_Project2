@@ -22,6 +22,7 @@
 #include "life.h"
 #include "minion.h"
 #include "miscellaneous.h"
+#include "blackjack.h"
 
 // Button at the downside of screen
 class Button_t : public QObject, public QGraphicsPixmapItem
@@ -117,6 +118,12 @@ public:
 
 
     QGraphicsScene* BlackJackScene;
+    QList<QGraphicsPixmapItem*> BlackJackScene_PixmapItem_CardList;
+    BlackJack_t* BlackJackGame;
+    QLabel* BlackJackScene_Label_Money;
+    QPushButton* BlackJackScene_Button_Back;
+    QPushButton* BlackJackScene_Button_StartEnd;
+    QPushButton* BlackJackScene_Button_MoreCard;
 
 
     void setupLoginScene();
@@ -165,6 +172,9 @@ public slots:
 
 
     void changetoBlackJackScene();
+    void BlackJackScene_BackClicked();
+    void BlackJackScene_StartEndClicked();
+    void BlackJackScene_MoreCardClicked();
 
 signals:
     void setupCompleted();

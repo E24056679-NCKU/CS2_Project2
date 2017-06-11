@@ -23,7 +23,8 @@ SOURCES += main.cpp \
     arrow.cpp \
     animation.cpp \
     aicontroller.cpp \
-    account.cpp
+    account.cpp \
+    blackjack.cpp
 
 HEADERS  += \
     minion.h \
@@ -37,7 +38,8 @@ HEADERS  += \
     animation.h \
     miscellaneous.h \
     aicontroller.h \
-    account.h
+    account.h \
+    blackjack.h
 
 FORMS    +=
 
