@@ -1,5 +1,7 @@
 #include "display.h"
 #include <QDebug>
+#include <QtGlobal>
+#include <QTime>
 
 Display_t::Display_t()
 {
@@ -10,6 +12,8 @@ Display_t::Display_t()
     this->setupGameScene();
 
     this->changetoLoginScene();
+    View->QWidget::setFixedSize(850, 650);
+
     View->show();
 }
 
@@ -33,6 +37,8 @@ MenuDisplay_t::MenuDisplay_t(QGraphicsView *ParentView)
     this->setupGameOverScene();
     this->setupLoginScene();
     this->setupRankScene();
+    this->setupCardBuyScene();
+    this->setupBlackJackScene();
 }
 
 MenuDisplay_t::~MenuDisplay_t()
@@ -40,6 +46,8 @@ MenuDisplay_t::~MenuDisplay_t()
     delete CardManageScene;
     delete GameOverScene;
     delete LoginScene;
+    delete RankScene;
+    delete CardBuyScene;
 }
 
 void MenuDisplay_t::setupLoginScene()
@@ -84,6 +92,13 @@ void MenuDisplay_t::setupCardManageScene()
     CardManageScene = new QGraphicsScene;
     CardManageScene->setSceneRect(0, 0, 800, 600);
 
+    CardManageScene_Button_BuyCard = new QPushButton;
+    CardManageScene->addWidget( this->CardManageScene_Button_BuyCard );
+    CardManageScene_Button_BuyCard->setGeometry(700, 500, 50, 50);
+    CardManageScene_Button_BuyCard->setText("Get Cards");
+    connect(CardManageScene_Button_BuyCard, SIGNAL(pressed()), this, SLOT(CardManageScene_BuyClicked()));
+
+
     for(int i=0;i<6;++i)
     {
         this->CardManageScene_Button_Card[i] = new QPushButton;
@@ -123,7 +138,76 @@ void MenuDisplay_t::setupCardManageScene()
     this->CardManageScene_Label = new QLabel;
     CardManageScene->addWidget( this->CardManageScene_Label );
     CardManageScene_Label->setGeometry(10, 565, 790, 25);
-    CardManageScene_Label->setText("HH");
+    CardManageScene_Label->setText("HelloWorld");
+}
+
+void MenuDisplay_t::setupCardBuyScene()
+{
+    qsrand(QTime::currentTime().msec());
+
+    CardBuyScene = new QGraphicsScene;
+    CardBuyScene->setSceneRect(0, 0, 800, 600);
+
+    this->CardBuyScene_Button_CardManageScene = new QPushButton;
+    CardBuyScene->addWidget( this->CardBuyScene_Button_CardManageScene );
+    CardBuyScene_Button_CardManageScene->setGeometry(700, 0, 100, 50);
+    CardBuyScene_Button_CardManageScene->setText("Back");
+    connect(CardBuyScene_Button_CardManageScene, SIGNAL(pressed()), this, SLOT(CardBuyScene_CardManageSceneClicked()));
+
+    this->CardBuyScene_Label_Money = new QLabel;
+    CardBuyScene->addWidget( this->CardBuyScene_Label_Money );
+    CardBuyScene_Label_Money->setGeometry(10, 10, 100, 25);
+    CardBuyScene_Label_Money->setText("Money");
+
+    for(int i=0;i<6;++i)
+    {
+        this->CardBuyScene_Button_Card[i] = new QPushButton;
+        CardBuyScene->addWidget( this->CardBuyScene_Button_Card[i] );
+        CardBuyScene_Button_Card[i]->setGeometry(40 + 150*(i%3), 60 + (i/3)*200, 100, 50);
+    }
+    CardBuyScene_Button_Card[0]->setText("5$");
+    CardBuyScene_Button_Card[1]->setText("5$");
+    CardBuyScene_Button_Card[2]->setText("5$");
+    CardBuyScene_Button_Card[3]->setText("5$");
+    CardBuyScene_Button_Card[4]->setText("5$");
+    CardBuyScene_Button_Card[5]->setText("5$");
+    connect(CardBuyScene_Button_Card[0], SIGNAL(pressed()), this, SLOT(CardBuyScene_Choose0Clicked()));
+    connect(CardBuyScene_Button_Card[1], SIGNAL(pressed()), this, SLOT(CardBuyScene_Choose1Clicked()));
+    connect(CardBuyScene_Button_Card[2], SIGNAL(pressed()), this, SLOT(CardBuyScene_Choose2Clicked()));
+    connect(CardBuyScene_Button_Card[3], SIGNAL(pressed()), this, SLOT(CardBuyScene_Choose3Clicked()));
+    connect(CardBuyScene_Button_Card[4], SIGNAL(pressed()), this, SLOT(CardBuyScene_Choose4Clicked()));
+    connect(CardBuyScene_Button_Card[5], SIGNAL(pressed()), this, SLOT(CardBuyScene_Choose5Clicked()));
+
+    for(int i=0;i<6;++i)
+    {
+        this->CardBuyScene_Label_CardCount[i] = new QLabel;
+        CardBuyScene->addWidget( this->CardBuyScene_Label_CardCount[i] );
+        CardBuyScene_Label_CardCount[i]->setGeometry(40+150*(i%3), 130+(i/3)*200, 100, 25);
+    }
+
+    this->CardBuyScene_Button_DrawCard = new QPushButton;
+    CardBuyScene->addWidget( this->CardBuyScene_Button_DrawCard );
+    CardBuyScene_Button_DrawCard->setGeometry(700, 500, 100, 50);
+    CardBuyScene_Button_DrawCard->setText("Draw2Cards\r\n25$");
+    connect(CardBuyScene_Button_DrawCard, SIGNAL(pressed()), this, SLOT(CardBuyScene_DrawCardClicked()));
+
+    this->CardBuyScene_Button_Combine = new QPushButton;
+    CardBuyScene->addWidget( this->CardBuyScene_Button_Combine );
+    CardBuyScene_Button_Combine->setGeometry(700, 400, 100, 50);
+    CardBuyScene_Button_Combine->setText("Random\r\nCombine\r\n5$");
+    connect(CardBuyScene_Button_Combine, SIGNAL(pressed()), this, SLOT(CardBuyScene_CombineClicked()));
+
+
+    this->CardBuyScene_Label_Status = new QLabel;
+    CardBuyScene->addWidget( this->CardBuyScene_Label_Status );
+    CardBuyScene_Label_Status->setGeometry(10, 500, 400, 25);
+    CardBuyScene_Label_Status->setText("Hello World");
+
+    this->CardBuyScene_Button_BlackJack = new QPushButton;
+    CardBuyScene->addWidget( this->CardBuyScene_Button_BlackJack );
+    CardBuyScene_Button_BlackJack->setGeometry(700, 250, 100, 50);
+    CardBuyScene_Button_BlackJack->setText("BlackJack");
+    connect(CardBuyScene_Button_BlackJack, SIGNAL(pressed()), this, SLOT(CardBuyScene_BlackJackClicked()));
 }
 
 void MenuDisplay_t::setupGameOverScene()
@@ -143,6 +227,12 @@ void MenuDisplay_t::setupRankScene()
     RankScene_Button_LoginScene->setGeometry(700, 0, 100, 50);
     RankScene_Button_LoginScene->setText("Back");
     connect(RankScene_Button_LoginScene, SIGNAL(pressed()), this, SLOT(RankScene_LoginSceneClicked()));
+}
+
+void MenuDisplay_t::setupBlackJackScene()
+{
+    BlackJackScene = new QGraphicsScene;
+    BlackJackScene->setSceneRect(0, 0, 800, 600);
 }
 
 void Display_t::changetoGameScene()
@@ -199,7 +289,24 @@ void MenuDisplay_t::LoginScene_CreateClicked()
     QString username = LoginScene_Input_Account->toPlainText();
     QString password = LoginScene_Input_Password->toPlainText();
 
-    if(username.contains(' ') || password.contains(' '))
+    bool valid = 1;
+
+    if(username.size() ==0 || password.size() == 0)
+        valid = 0;
+    for(int i=0;i<username.size();++i)
+        if( ! username[i].isLetterOrNumber() )
+        {
+            valid = 0;
+            break;
+        }
+    for(int i=0;i<password.size();++i)
+        if( ! password[i].isLetterOrNumber() )
+        {
+            valid = 0;
+            break;
+        }
+
+    if( !valid )
     {
         this->LoginScene_Label->setText("Invalid Username or Password");
         return;
@@ -272,6 +379,11 @@ void MenuDisplay_t::changetoCardManageScene()
     ParentView->setScene( this->CardManageScene );
 }
 
+void MenuDisplay_t::CardManageScene_BuyClicked()
+{
+    changetoCardBuyScene();
+}
+
 void MenuDisplay_t::CardManageScene_SubmitClicked()
 {
     int SelectedCnt = 0;
@@ -299,60 +411,242 @@ void MenuDisplay_t::CardManageScene_Choose0Clicked()
 {
     if( this->CardManageScene_Button_Card[0]->text() == "Invalid")
         return;
-    else if( this->CardManageScene_Button_Card[0]->text() == "Choose")
+    else if( this->CardManageScene_Button_Card[0]->text() == "Select")
         this->CardManageScene_Button_Card[0]->setText("Selected");
     else
-        this->CardManageScene_Button_Card[0]->setText("Choose");
+        this->CardManageScene_Button_Card[0]->setText("Select");
 }
 void MenuDisplay_t::CardManageScene_Choose1Clicked()
 {
     if( this->CardManageScene_Button_Card[1]->text() == "Invalid")
         return;
-    else if( this->CardManageScene_Button_Card[1]->text() == "Choose")
+    else if( this->CardManageScene_Button_Card[1]->text() == "Select")
         this->CardManageScene_Button_Card[1]->setText("Selected");
     else
-        this->CardManageScene_Button_Card[1]->setText("Choose");
+        this->CardManageScene_Button_Card[1]->setText("Select");
 }
 void MenuDisplay_t::CardManageScene_Choose2Clicked()
 {
     if( this->CardManageScene_Button_Card[2]->text() == "Invalid")
         return;
-    else if( this->CardManageScene_Button_Card[2]->text() == "Choose")
+    else if( this->CardManageScene_Button_Card[2]->text() == "Select")
         this->CardManageScene_Button_Card[2]->setText("Selected");
     else
-        this->CardManageScene_Button_Card[2]->setText("Choose");
+        this->CardManageScene_Button_Card[2]->setText("Select");
 }
 void MenuDisplay_t::CardManageScene_Choose3Clicked()
 {
     if( this->CardManageScene_Button_Card[3]->text() == "Invalid")
         return;
-    else if( this->CardManageScene_Button_Card[3]->text() == "Choose")
+    else if( this->CardManageScene_Button_Card[3]->text() == "Select")
         this->CardManageScene_Button_Card[3]->setText("Selected");
     else
-        this->CardManageScene_Button_Card[3]->setText("Choose");
+        this->CardManageScene_Button_Card[3]->setText("Select");
 }
 void MenuDisplay_t::CardManageScene_Choose4Clicked()
 {
     if( this->CardManageScene_Button_Card[4]->text() == "Invalid")
         return;
-    else if( this->CardManageScene_Button_Card[4]->text() == "Choose")
+    else if( this->CardManageScene_Button_Card[4]->text() == "Select")
         this->CardManageScene_Button_Card[4]->setText("Selected");
     else
-        this->CardManageScene_Button_Card[4]->setText("Choose");
+        this->CardManageScene_Button_Card[4]->setText("Select");
 }
 void MenuDisplay_t::CardManageScene_Choose5Clicked()
 {
     if( this->CardManageScene_Button_Card[5]->text() == "Invalid")
         return;
-    else if( this->CardManageScene_Button_Card[5]->text() == "Choose")
+    else if( this->CardManageScene_Button_Card[5]->text() == "Select")
         this->CardManageScene_Button_Card[5]->setText("Selected");
     else
-        this->CardManageScene_Button_Card[5]->setText("Choose");
+        this->CardManageScene_Button_Card[5]->setText("Select");
+}
+
+void MenuDisplay_t::changetoCardBuyScene()
+{
+    CardBuyScene_Label_Money->setText( QString::number(Account->Money) );
+    for(int i=0;i<6;++i)
+    {
+        CardBuyScene_Label_CardCount[i]->setText( QString::number(Account->CardCount[i]) );
+    }
+
+    ParentView->setScene( this->CardBuyScene );
+}
+
+void MenuDisplay_t::CardBuyScene_CardManageSceneClicked()
+{
+    this->changetoCardManageScene();
+}
+
+void MenuDisplay_t::CardBuyScene_DrawCardClicked()
+{
+    if( Account->Money < 25 )
+    {
+        CardBuyScene_Label_Status->setText("Some Problem With Your Eyes or Math ?");
+        return;
+    }
+    int rnd[2];
+    rnd[0] = qrand()%6;
+    rnd[1] = qrand()%6;
+    CardBuyScene_Label_Status->setText( QString("You got Card") + QString::number(rnd[0]) + " and Card" + QString::number(rnd[1]) );
+    Account->Money -= 25;
+    //CardBuyScene_Label_Money->setText( QString::number(Account->Money) );
+    Account->CardCount[rnd[0]]++;
+    Account->CardCount[rnd[1]]++;
+    AccountManager->saveFile();
+    this->changetoCardBuyScene();
+}
+
+void MenuDisplay_t::CardBuyScene_CombineClicked()
+{
+    if( Account->Money < 5 )
+    {
+        CardBuyScene_Label_Status->setText("Some Problem With Your Eyes or Math ?");
+        return;
+    }
+    int rnd[3];
+    int cardcnt[6];
+    bool valid;
+    do
+    {
+        valid = 1;
+        for(int i=0;i<6;++i)
+            cardcnt[i] = Account->CardCount[i];
+        rnd[0] = qrand()%6;
+        rnd[1] = qrand()%6;
+        rnd[2] = qrand()%6;
+        cardcnt[rnd[0]]--;
+        cardcnt[rnd[1]]--;
+        for(int i=0;i<6;++i)
+            if(cardcnt[i] < 0)
+                valid = 0;
+    }while(!valid);
+    CardBuyScene_Label_Status->setText( QString("You Combined Card") + QString::number(rnd[0]) + " and Card" + QString::number(rnd[1]) + " to get Card" + QString::number(rnd[2]));
+    Account->Money -= 5;
+    // CardBuyScene_Label_Money->setText( QString::number(Account->Money) );
+    Account->CardCount[rnd[0]]--;
+    Account->CardCount[rnd[1]]--;
+    Account->CardCount[rnd[2]]++;
+    AccountManager->saveFile();
+    this->changetoCardBuyScene();
+}
+
+void MenuDisplay_t::CardBuyScene_Choose0Clicked()
+{
+    int cost = CardBuyScene_Button_Card[0]->text().remove('$').toInt();
+    if( cost > Account->Money )
+    {
+        CardBuyScene_Label_Status->setText("Some Problem With Your Eyes or Math ?");
+        return;
+    }
+    else
+    {
+        Account->Money -= cost;
+        Account->CardCount[0] ++;
+        AccountManager->saveFile();
+        CardBuyScene_Label_Status->setText("You Bought One Card 0");
+    }
+    this->changetoCardBuyScene();
+}
+void MenuDisplay_t::CardBuyScene_Choose1Clicked()
+{
+    int cost = CardBuyScene_Button_Card[1]->text().remove('$').toInt();
+    if( cost > Account->Money )
+    {
+        CardBuyScene_Label_Status->setText("Some Problem With Your Eyes or Math ?");
+        return;
+    }
+    else
+    {
+        Account->Money -= cost;
+        Account->CardCount[1] ++;
+        AccountManager->saveFile();
+        CardBuyScene_Label_Status->setText("You Bought One Card 1");
+    }
+    this->changetoCardBuyScene();
+}
+void MenuDisplay_t::CardBuyScene_Choose2Clicked()
+{
+    int cost = CardBuyScene_Button_Card[2]->text().remove('$').toInt();
+    if( cost > Account->Money )
+    {
+        CardBuyScene_Label_Status->setText("Some Problem With Your Eyes or Math ?");
+        return;
+    }
+    else
+    {
+        Account->Money -= cost;
+        Account->CardCount[2] ++;
+        AccountManager->saveFile();
+        CardBuyScene_Label_Status->setText("You Bought One Card 2");
+    }
+    this->changetoCardBuyScene();
+}
+void MenuDisplay_t::CardBuyScene_Choose3Clicked()
+{
+    int cost = CardBuyScene_Button_Card[3]->text().remove('$').toInt();
+    if( cost > Account->Money )
+    {
+        CardBuyScene_Label_Status->setText("Some Problem With Your Eyes or Math ?");
+        return;
+    }
+    else
+    {
+        Account->Money -= cost;
+        Account->CardCount[3] ++;
+        AccountManager->saveFile();
+        CardBuyScene_Label_Status->setText("You Bought One Card 3");
+    }
+    this->changetoCardBuyScene();
+}
+void MenuDisplay_t::CardBuyScene_Choose4Clicked()
+{
+    int cost = CardBuyScene_Button_Card[4]->text().remove('$').toInt();
+    if( cost > Account->Money )
+    {
+        CardBuyScene_Label_Status->setText("Some Problem With Your Eyes or Math ?");
+        return;
+    }
+    else
+    {
+        Account->Money -= cost;
+        Account->CardCount[4] ++;
+        AccountManager->saveFile();
+        CardBuyScene_Label_Status->setText("You Bought One Card 4");
+    }
+    this->changetoCardBuyScene();
+}
+void MenuDisplay_t::CardBuyScene_Choose5Clicked()
+{
+    int cost = CardBuyScene_Button_Card[5]->text().remove('$').toInt();
+    if( cost > Account->Money )
+    {
+        CardBuyScene_Label_Status->setText("Some Problem With Your Eyes or Math ?");
+        return;
+    }
+    else
+    {
+        Account->Money -= cost;
+        Account->CardCount[5] ++;
+        AccountManager->saveFile();
+        CardBuyScene_Label_Status->setText("You Bought One Card 5");
+    }
+    this->changetoCardBuyScene();
+}
+
+void MenuDisplay_t::CardBuyScene_BlackJackClicked()
+{
+    this->changetoBlackJackScene();
 }
 
 void MenuDisplay_t::changetoGameOverScene()
 {
     ParentView->setScene( this->GameOverScene );
+}
+
+void MenuDisplay_t::changetoBlackJackScene()
+{
+    ParentView->setScene( this->BlackJackScene );
 }
 
 Display_t::~Display_t()

@@ -96,6 +96,7 @@ public:
 
 
     QGraphicsScene* CardManageScene;
+    QPushButton* CardManageScene_Button_BuyCard;
     QPushButton* CardManageScene_Button_Card[6];
     QLabel* CardManageScene_Label_Card[6];
     QGraphicsPixmapItem* CardManageScene_PixmapItem_Card[6];
@@ -103,10 +104,27 @@ public:
     QLabel* CardManageScene_Label;
 
 
+    QGraphicsScene* CardBuyScene;
+    QPushButton* CardBuyScene_Button_CardManageScene;
+    QLabel* CardBuyScene_Label_Money;
+    QPushButton* CardBuyScene_Button_Card[6];
+    QPushButton* CardBuyScene_Button_DrawCard;
+    QPushButton* CardBuyScene_Button_Combine;
+    QPushButton* CardBuyScene_Button_Trade;
+    QLabel* CardBuyScene_Label_Status;
+    QLabel* CardBuyScene_Label_CardCount[6];
+    QPushButton* CardBuyScene_Button_BlackJack;
+
+
+    QGraphicsScene* BlackJackScene;
+
+
     void setupLoginScene();
     void setupCardManageScene();
+    void setupCardBuyScene();
     void setupGameOverScene();
     void setupRankScene();
+    void setupBlackJackScene();
 
 public slots:
     void changetoLoginScene();
@@ -120,6 +138,7 @@ public slots:
 
 
     void changetoCardManageScene();
+    void CardManageScene_BuyClicked();
     void CardManageScene_SubmitClicked();
     void CardManageScene_Choose0Clicked();
     void CardManageScene_Choose1Clicked();
@@ -129,7 +148,23 @@ public slots:
     void CardManageScene_Choose5Clicked();
 
 
+    void changetoCardBuyScene();
+    void CardBuyScene_CardManageSceneClicked();
+    void CardBuyScene_DrawCardClicked();
+    void CardBuyScene_CombineClicked();
+    void CardBuyScene_Choose0Clicked();
+    void CardBuyScene_Choose1Clicked();
+    void CardBuyScene_Choose2Clicked();
+    void CardBuyScene_Choose3Clicked();
+    void CardBuyScene_Choose4Clicked();
+    void CardBuyScene_Choose5Clicked();
+    void CardBuyScene_BlackJackClicked();
+
+
     void changetoGameOverScene();
+
+
+    void changetoBlackJackScene();
 
 signals:
     void setupCompleted();

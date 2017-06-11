@@ -1,7 +1,7 @@
 #include "account.h"
 #include <QDebug>
-#include<QFile>
-#include<QString>
+#include <QFile>
+#include <QString>
 
 Account_t::Account_t(QString Username, QString Password, int Money, int CardCount[])
 {
