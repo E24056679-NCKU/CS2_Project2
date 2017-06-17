@@ -59,7 +59,7 @@ void Tower_t::run()
 
 void Tower_t::attack(Life_t *target)
 {
-    arrowAttack(target);
+    //arrowAttack(target);
 }
 
 TowerManager_t::TowerManager_t() : QObject()

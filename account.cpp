@@ -45,11 +45,6 @@ void AccountManager_t::loadFile()
             in >> card[i];
         AccountList.insert( username, new Account_t(username, password, money, card) );
     }
-
-    for(auto &i : AccountList)
-    {
-        qDebug() << i->Username << i->Password;
-    }
 }
 
 void AccountManager_t::saveFile()

@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QtGlobal>
 #include <QTime>
+#include <QKeyEvent>
 
 Display_t::Display_t()
 {
@@ -121,9 +122,14 @@ void MenuDisplay_t::setupCardManageScene()
         CardManageScene_Label_Card[i]->setText("CARD");
     }
 
+    this->CardManageScene_PixmapItem_Card[0] = new QGraphicsPixmapItem( *ChairMinion_t::BasicImage );
+    this->CardManageScene_PixmapItem_Card[1] = new QGraphicsPixmapItem( *ChangMinion_t::BasicImage );
+    this->CardManageScene_PixmapItem_Card[2] = new QGraphicsPixmapItem( *ChengMinion_t::BasicImage );
+    this->CardManageScene_PixmapItem_Card[3] = new QGraphicsPixmapItem( *JouMinion_t::BasicImage );
+    this->CardManageScene_PixmapItem_Card[4] = new QGraphicsPixmapItem( *LeeMinion_t::BasicImage );
+    this->CardManageScene_PixmapItem_Card[5] = new QGraphicsPixmapItem( *TsaiMinion_t::BasicImage );
     for(int i=0;i<6;++i)
     {
-        this->CardManageScene_PixmapItem_Card[i] = new QGraphicsPixmapItem( QPixmap("./resources/images/DerivedMinion.jpg") );
         CardManageScene->addItem( this->CardManageScene_PixmapItem_Card[i] );
         CardManageScene_PixmapItem_Card[i]->setScale(3);
         CardManageScene_PixmapItem_Card[i]->setPos(250*(i%3) + 65, 20 + 250*(i/3));
@@ -275,9 +281,9 @@ void Display_t::changetoCardManageScene()
     MenuDisplay->changetoCardManageScene();
 }
 
-void Display_t::changetoGameOverScene()
+void Display_t::changetoGameOverScene(int Winner)
 {
-    MenuDisplay->changetoGameOverScene();
+    MenuDisplay->changetoGameOverScene(Winner);
 }
 
 void MenuDisplay_t::changetoLoginScene()
@@ -399,6 +405,8 @@ void MenuDisplay_t::changetoCardManageScene()
         CardManageScene_Label_Card[i]->setText( QString::number(Account->CardCount[i]) );
         if( Account->CardCount[i] == 0)
             CardManageScene_Button_Card[i]->setText("Invalid");
+        else
+            CardManageScene_Button_Card[i]->setText("Select");
     }
 
     ParentView->setScene( this->CardManageScene );
@@ -411,18 +419,24 @@ void MenuDisplay_t::CardManageScene_BuyClicked()
 
 void MenuDisplay_t::CardManageScene_SubmitClicked()
 {
+    QList<int> CardSelected;
     int SelectedCnt = 0;
     for(int i=0;i<6;++i)
+    {
         if( CardManageScene_Button_Card[i]->text() == "Selected")
+        {
             ++SelectedCnt;
+            CardSelected.push_back(i);
+        }
+    }
     if(SelectedCnt > 4)
     {
         CardManageScene_Label->setText("Too Many Cards Have Been Selected. You Can Select At Most 4 Cards");
         return;
     }
-    else if(SelectedCnt == 0)
+    else if(SelectedCnt < 2)
     {
-        CardManageScene_Label->setText("Select At Least One Card");
+        CardManageScene_Label->setText("Select At Least Two Card");
         return;
     }
     else
@@ -430,6 +444,12 @@ void MenuDisplay_t::CardManageScene_SubmitClicked()
         CardManageScene_Label->setText("Selected Succeeded");
     }
 
+    for(int i=0;i<CardSelected.size();++i)
+    {
+        Account->CardCount[ CardSelected[i] ] --;
+    }
+    AccountManager->saveFile();
+    emit setupCompleted(CardSelected);
 }
 
 void MenuDisplay_t::CardManageScene_Choose0Clicked()
@@ -524,7 +544,10 @@ void MenuDisplay_t::CardBuyScene_DrawCardClicked()
 
 void MenuDisplay_t::CardBuyScene_CombineClicked()
 {
-    if( Account->Money < 5 )
+    int cardTotal = 0;
+    for(int i=0;i<6;++i)
+        cardTotal += Account->CardCount[i];
+    if( Account->Money < 5 || cardTotal < 2 )
     {
         CardBuyScene_Label_Status->setText("Some Problem With Your Eyes or Math ?");
         return;
@@ -664,9 +687,23 @@ void MenuDisplay_t::CardBuyScene_BlackJackClicked()
     this->changetoBlackJackScene();
 }
 
-void MenuDisplay_t::changetoGameOverScene()
+void MenuDisplay_t::changetoGameOverScene(int Winner)
 {
-    ParentView->setScene( this->GameOverScene );
+    QGraphicsScene* gameOverScene = new QGraphicsScene;
+    ParentView->setScene( gameOverScene );
+    if( Winner == 0 ) // draw
+    {
+        // ParentView->setScene( this->GameOverScene );
+        gameOverScene->addText("Draw")->setScale(10);
+    }
+    else if( Winner == 1 ) // Player 1 win
+    {
+        gameOverScene->addText("Player1 Win")->setScale(10);
+    }
+    else if( Winner == 2 ) // player 2 win
+    {
+        gameOverScene->addText("Player2 Win")->setScale(10);
+    }
 }
 
 void MenuDisplay_t::changetoBlackJackScene()
@@ -764,9 +801,11 @@ void Display_t::removeItem(QGraphicsItem *Item)
     Scene->removeItem(Item);
 }
 
-void Display_t::addAnimation(QPointF center, int period, QList<QString> &pathList)
+void Display_t::addAnimation(QPointF center)
 {
-    this->addItem( dynamic_cast<QGraphicsItem*>(new Animation_t(center, period, pathList)) );
+    // this->addItem( dynamic_cast<QGraphicsItem*>(new Animation_t(center, period, pathList)) );
+    Animation_t *ani = new Animation_t(center, "./resources/images/eff.gif", &this->Scene->AnimationList);
+    this->Scene->addWidget( ani );
 }
 
 ControllableDisplay_t::ControllableDisplay_t()
@@ -774,6 +813,7 @@ ControllableDisplay_t::ControllableDisplay_t()
     for(int i=0;i<4;++i)
         connect(Button[i], SIGNAL(selectedByMouse(int)), this, SLOT(emit_ReceivedSignal_SelectCard(int)));
     connect(Scene, SIGNAL(positionSelected(QPointF)), this, SLOT(positionSelected(QPointF)));
+    connect(Scene, SIGNAL(keyPressed(int)), this, SLOT(keyPressed(int)));
 }
 
 ControllableDisplay_t::~ControllableDisplay_t()
@@ -791,6 +831,11 @@ void ControllableDisplay_t::positionSelected(QPointF Position)
 {
     qDebug() << "CD got posSel, " << Position.x(), Position.y();
     emit receivedSignal_SelectPosition(Position);
+}
+
+void ControllableDisplay_t::keyPressed(int key)
+{
+    emit receivedSignal_KeyPressed(key);
 }
 
 void Minion_t::mousePressEvent(QGraphicsSceneMouseEvent* event)
@@ -837,7 +882,26 @@ MyQGraphicsScene::~MyQGraphicsScene()
 
 void MyQGraphicsScene::updateBlackScreen()
 {
-    BlackScreen->fill( QColor(0, 0, 0, 100) ); // completely black
+    BlackScreen->fill( QColor(0, 0, 0, 255) ); // completely black
+    for(int i=0;i<25;++i) // button and label on battlefield
+    {
+        QRgb* Player1Score_Label = reinterpret_cast<QRgb*>(BlackScreen->scanLine(i));
+        Player1Score_Label += 0;
+        QRgb* Player2Score_Label = reinterpret_cast<QRgb*>(BlackScreen->scanLine(i));
+        Player2Score_Label += 750;
+        QRgb* CountDown_Label = reinterpret_cast<QRgb*>(BlackScreen->scanLine(i));
+        Player1Score_Label += 387;
+        QRgb* Skill_Button = reinterpret_cast<QRgb*>(BlackScreen->scanLine(i+25));
+        Player1Score_Label += 0;
+        for(int j=0;j<50;++j)
+        {
+            Player1Score_Label[j] = 0x00FFFFFF;
+            Player2Score_Label[j] = 0x00FFFFFF;
+            CountDown_Label[j] = 0x00FFFFFF;
+            Skill_Button[j] = 0x00FFFFFF;
+        }
+    }
+
     for(auto &item_ptr : QGraphicsScene::items()) // for each item in QGraphcisScene
     {
         int transparency = 0;
@@ -879,8 +943,9 @@ void MyQGraphicsScene::updateBlackScreen()
 
         // Animation can lighten dark area
         transparency = 0;
-        Animation_t* ani = dynamic_cast<Animation_t*>(item_ptr);
-        if(ani != nullptr) // if the item is a Animation
+        // Animation_t* ani = dynamic_cast<Animation_t*>(item_ptr);
+        // if(ani != nullptr) // if the item is a Animation
+        for(auto &ani : this->AnimationList)
         {
             int lb = std::max(0.0, ani->Center.x() - 100); // left bound
             int rb = std::min(799.0, ani->Center.x() + 100); // right
@@ -935,4 +1000,9 @@ void MyQGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         return;
     }
     QGraphicsScene::mousePressEvent(event); // pass the event to item
+}
+
+void MyQGraphicsScene::keyPressEvent(QKeyEvent *event)
+{
+    emit keyPressed(event->key());
 }

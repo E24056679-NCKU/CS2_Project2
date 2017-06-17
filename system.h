@@ -26,8 +26,8 @@ public:
 protected slots:
     void setAccount(Account_t* account);
 
-    void startGame();
-    void receivedGameOver();
+    void startGame(QList<int> cardSelected);
+    void receivedGameOver(int score1, int score2);
 
     // add/remove item to Display
     void itemAdded(QGraphicsItem* addItem);
@@ -36,14 +36,19 @@ protected slots:
     // incoming signals from controller1
     void receivedSignal1_SelectPosition(QPointF Position);
     void receivedSignal1_SelectMinion(Minion_t* selMinion);
-    void receivedSignal1_SelectCard(int CardID);
+    void receivedSignal1_SelectCard(int ButtonID);
+    void receivedSignal1_KeyPressed(int key);
     // incoming signals from controller2
     void receivedSignal2_SelectPosition(QPointF Position);
     void receivedSignal2_SelectMinion(Minion_t* selMinion);
-    void receivedSignal2_SelectCard(int CardID);
+    void receivedSignal2_SelectCard(int ButtonID);
+    void receivedSignal2_KeyPressed(int key);
 
     // forward to Display
-    void addAnimation(QPointF center, int period, QList<QString> &pathList);
+    void addAnimation(QPointF center);
+
+    // change the button's image to newMinion's image
+    void changeButtonImage(int ButtonID, MinionType minionType);
 
 protected:
     AccountManager_t* AccountManager;

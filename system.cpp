@@ -2,6 +2,15 @@
 
 System::System(ControllerSlot_t* Controller1 = nullptr, ControllerSlot_t* Controller2 = nullptr)
 {
+    // initialize mininos' image
+    ChairMinion_t();
+    ChangMinion_t();
+    ChengMinion_t();
+    JouMinion_t();
+    LeeMinion_t();
+    TsaiMinion_t();
+
+
     if(Controller1 == nullptr)
     {
         ControllableDisplay = new ControllableDisplay_t;
@@ -18,6 +27,7 @@ System::System(ControllerSlot_t* Controller1 = nullptr, ControllerSlot_t* Contro
     connect(ControllerSlot[0], SIGNAL(receivedSignal_SelectCard(int)), this, SLOT(receivedSignal1_SelectCard(int)));
     connect(ControllerSlot[0], SIGNAL(receivedSignal_SelectMinion(Minion_t*)), this, SLOT(receivedSignal1_SelectMinion(Minion_t*)));
     connect(ControllerSlot[0], SIGNAL(receivedSignal_SelectPosition(QPointF)), this, SLOT(receivedSignal1_SelectPosition(QPointF)));
+    connect(ControllerSlot[0], SIGNAL(receivedSignal_KeyPressed(int)), this, SLOT(receivedSignal1_KeyPressed(int)));
 
     if(Controller2 == nullptr)
     {
@@ -33,19 +43,28 @@ System::System(ControllerSlot_t* Controller1 = nullptr, ControllerSlot_t* Contro
     connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectCard(int)), this, SLOT(receivedSignal1_SelectCard(int)));
     connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectMinion(Minion_t*)), this, SLOT(receivedSignal1_SelectMinion(Minion_t*)));
     connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectPosition(QPointF)), this, SLOT(receivedSignal1_SelectPosition(QPointF)));
+    connect(ControllerSlot[1], SIGNAL(receivedSignal_KeyPressed(int)), this, SLOT(receivedSignal2_KeyPressed(int)));
 
     BattleManager = new BattleManager_t();
-    connect(BattleManager, SIGNAL(gameOver()), this, SLOT(receivedGameOver()));
+    connect(BattleManager, SIGNAL(gameOver(int,int)), this, SLOT(receivedGameOver(int,int)));
     connect(BattleManager, SIGNAL(itemAdded(QGraphicsItem*)), this, SLOT(itemAdded(QGraphicsItem*)));
     connect(BattleManager, SIGNAL(itemRemoved(QGraphicsItem*)), this, SLOT(itemRemoved(QGraphicsItem*)));
-    connect(BattleManager, SIGNAL(request_Animation(QPointF,int,QList<QString>&)), this, SLOT(addAnimation(QPointF,int,QList<QString>&)));
+    connect(BattleManager, SIGNAL(request_Animation(QPointF)), this, SLOT(addAnimation(QPointF)));
+    connect(BattleManager, SIGNAL(changeButtonImage(int,MinionType)), this, SLOT(changeButtonImage(int,MinionType)));
     // not until now can item created by BattleManager be added to scene
     BattleManager->initialize(); // for initializing towers
 
     AccountManager = new AccountManager_t;
     Display->MenuDisplay->AccountManager = AccountManager;
-    connect(Display->MenuDisplay, SIGNAL(setupCompleted()), this, SLOT(startGame()));
+    connect(Display->MenuDisplay, SIGNAL(setupCompleted(QList<int>)), this, SLOT(startGame(QList<int>)));
     connect(Display->MenuDisplay, SIGNAL(accountLogined(Account_t*)), this, SLOT(setAccount(Account_t*)));
+
+
+    // create score, countdown, and skillbutton(for android)
+    Display->Scene->addWidget(BattleManager->Player1Score_Label);
+    Display->Scene->addWidget(BattleManager->Player2Score_Label);
+    Display->Scene->addWidget(BattleManager->CountDown_Label);
+    Display->Scene->addWidget(BattleManager->Skill_Button);
 }
 
 System::~System()
@@ -61,19 +80,27 @@ void System::setAccount(Account_t* account)
     this->Account = account;
 }
 
-void System::startGame()
+void System::startGame(QList<int> cardSelected)
 {
     Display->changetoGameScene();
+    BattleManager->setupCards(cardSelected, BattleManager->Player1);
     BattleManager->Timer->start(10); // start game
 
     //DBG
-    BattleManager->addMinion(MinionType::DerivedMinion, MinionTeam::MyTeam, QPointF(400, 300));
+    // BattleManager->addMinion(MinionType::DerivedMinion, MinionTeam::MyTeam, QPointF(400, 300));
 }
 
-void System::receivedGameOver()
+void System::receivedGameOver(int score1, int score2)
 {
     delete BattleManager; // must be delete first
-    Display->changetoGameOverScene();
+    Account->Money += score1;
+    AccountManager->saveFile();
+    if( score1 > score2 )
+        Display->changetoGameOverScene(1);
+    else if(score1 < score2 )
+        Display->changetoGameOverScene(2);
+    else
+        Display->changetoGameOverScene(0);
 }
 
 void System::itemAdded(QGraphicsItem *addItem)
@@ -105,9 +132,14 @@ void System::receivedSignal1_SelectMinion(Minion_t *selMinion)
     BattleManager->receivedSignal1_SelectMinion(selMinion);
 }
 
-void System::receivedSignal1_SelectCard(int CardID)
+void System::receivedSignal1_SelectCard(int ButtonID)
 {
-    BattleManager->receivedSignal1_SelectCard(CardID);
+    BattleManager->receivedSignal1_SelectCard(ButtonID);
+}
+
+void System::receivedSignal1_KeyPressed(int key)
+{
+    BattleManager->receivedSignal1_KeyPressed(key);
 }
 
 void System::receivedSignal2_SelectPosition(QPointF Position)
@@ -120,12 +152,49 @@ void System::receivedSignal2_SelectMinion(Minion_t *selMinion)
     BattleManager->receivedSignal2_SelectMinion(selMinion);
 }
 
-void System::receivedSignal2_SelectCard(int CardID)
+void System::receivedSignal2_SelectCard(int ButtonID)
 {
-    BattleManager->receivedSignal2_SelectCard(CardID);
+    BattleManager->receivedSignal2_SelectCard(ButtonID);
 }
 
-void System::addAnimation(QPointF center, int period, QList<QString> &pathList)
+void System::receivedSignal2_KeyPressed(int key)
 {
-    Display->addAnimation(center, period, pathList);
+    BattleManager->receivedSignal2_KeyPressed(key);
+}
+
+void System::addAnimation(QPointF center)
+{
+    Display->addAnimation(center);
+}
+
+void System::changeButtonImage(int ButtonID, MinionType minionType)
+{
+    if( minionType == -1 )
+    {
+        Display->Button[ ButtonID ]->setPixmap( QPixmap("./resources/images/Button.jpg") );
+    }
+    else if( minionType == MinionType::ChairMinion )
+    {
+        Display->Button[ ButtonID ]->setPixmap( *ChairMinion_t::ButtonImage );
+    }
+    else if( minionType == MinionType::ChangMinion )
+    {
+        Display->Button[ ButtonID ]->setPixmap( *ChangMinion_t::ButtonImage );
+    }
+    else if( minionType == MinionType::ChengMinion )
+    {
+        Display->Button[ ButtonID ]->setPixmap( *ChengMinion_t::ButtonImage );
+    }
+    else if( minionType == MinionType::JouMinion )
+    {
+        Display->Button[ ButtonID ]->setPixmap( *JouMinion_t::ButtonImage );
+    }
+    else if( minionType == MinionType::LeeMinion )
+    {
+        Display->Button[ ButtonID ]->setPixmap( *LeeMinion_t::ButtonImage );
+    }
+    else if( minionType == MinionType::TsaiMinion )
+    {
+        Display->Button[ ButtonID ]->setPixmap( *TsaiMinion_t::ButtonImage );
+    }
 }

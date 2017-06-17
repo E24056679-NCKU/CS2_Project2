@@ -19,13 +19,15 @@ protected slots:
     // i.e., when the Controller finish its signal processing, it should call one of these function to emit signal
     void emit_ReceivedSignal_SelectPosition(QPointF Position);
     void emit_ReceivedSignal_SelectMinion(Minion_t* selMinion);
-    void emit_ReceivedSignal_SelectCard(int CardID);
+    void emit_ReceivedSignal_SelectCard(int ButtonID);
+    void emit_ReceivedSignal_KeyPressed(int key);
 
 signals:
     // emit signals to System , then System will forward the signal to BattleManager
     void receivedSignal_SelectPosition(QPointF Position);
     void receivedSignal_SelectMinion(Minion_t* selMinion);
-    void receivedSignal_SelectCard(int CardID); // CardID = [0,3]
+    void receivedSignal_SelectCard(int ButtonID); // CardID = [0,3]
+    void receivedSignal_KeyPressed(int key);
 
 private:
 

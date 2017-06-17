@@ -1,5 +1,38 @@
 #include "animation.h"
 
+Animation_t::Animation_t(QPointF Center, QString filename, QSet<Animation_t*> * parentSet)
+{
+    this->ParentSet = parentSet;
+    this->ParentSet->insert(this);
+    this->setGeometry(Center.x() - 50, Center.y() - 50, 100, 100);
+    this->Center = Center;
+    Timer = new QTimer;
+    Gif = new QMovie(filename);
+    this->setMovie(Gif);
+    connect(Timer, SIGNAL(timeout()), this, SLOT(countDown()));
+    Gif->start();
+    Timer->start(1);
+}
+
+Animation_t::~Animation_t()
+{
+    delete Timer;
+    delete Gif;
+}
+
+void Animation_t::countDown()
+{
+    if( Gif->currentFrameNumber() == Gif->frameCount() - 1 )
+    {
+        Gif->stop();
+        Timer->stop();
+        // emit animationEnd(this);
+        ParentSet->erase( ParentSet->find(this) );
+        delete this;
+    }
+}
+
+/*
 Animation_t::Animation_t(QPointF center, int period, QList<QString> &pathList)
 {
     this->Center = center;
@@ -36,3 +69,4 @@ void Animation_t::nextImage()
         delete this;
     }
 }
+*/

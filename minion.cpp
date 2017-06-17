@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QtMath>
 #include "minion.h"
 #include "tower.h"
 
@@ -34,8 +35,18 @@ void Minion_t::run()
 
 void Minion_t::move()
 {
-    this->Pos.setX( this->Pos.x() + this->Speed);
-    this->Center.setX( this->Pos.x() + this->Speed ); // !! remember to set Center, or fog will go wrong
+    double theta = qAtan( qAbs(this->TargetPos.y() - this->Center.y()) / qAbs(this->TargetPos.x() - this->Center.x()) );
+    int dx = this->Speed * qCos(theta);
+    int dy = this->Speed * qSin(theta);
+    if( this->TargetPos.x() < this->Center.x() )
+        dx = -dx;
+    if( this->TargetPos.y() < this->Center.y() )
+        dy = -dy;
+
+    this->Pos.setX( this->Pos.x() + dx);
+    this->Center.setX( this->Center.x() + dx ); // !! remember to set Center, or fog will go wrong
+    this->Pos.setY( this->Pos.y() + dy);
+    this->Center.setY( this->Center.y() + dy ); // !! remember to set Center, or fog will go wrong
     this->setPos(this->Pos);
 
     // if out of boundary
@@ -46,6 +57,26 @@ void Minion_t::move()
 void Minion_t::attack(Life_t *target)
 {
     qDebug() << "Error, abstract Minion's attack has been executed";
+}
+
+void Minion_t::skill()
+{
+    LifeTeam tarTeam = this->Team == LifeTeam::MyTeam ? LifeTeam::OpsTeam : LifeTeam::MyTeam;
+    /*
+    Life_t* skillCenterLife;
+    this->request_FindTarget(this, tarTeam, skillCenterLife);
+    if( skillCenterLife == nullptr )
+        return;
+    this->request_RangeAttack(this, skillCenterLife->Center, 100.0, this->Damage, tarTeam);
+    this->request_Animation(skillCenterLife->Center);
+    */
+    QList<Life_t*> attackee;
+    this->request_FindAllTarget(this, tarTeam, attackee, 9999);
+    for(auto &i : attackee)
+    {
+        i->HP -= this->Damage;
+        this->request_Animation( i->Center );
+    }
 }
 
 MinionManager_t::MinionManager_t() : QObject()
@@ -73,23 +104,49 @@ Minion_t *MinionManager_t::addMinion(MinionType Type, MinionTeam Team, QPointF P
             MinionList.insert( newMinion );
             break;
 
+        case ChairMinion :
+            newMinion = dynamic_cast<Minion_t*>(new ChairMinion_t());
+            MinionList.insert( newMinion );
+            break;
+        case ChangMinion :
+            newMinion = dynamic_cast<Minion_t*>(new ChangMinion_t());
+            MinionList.insert( newMinion );
+            break;
+        case ChengMinion :
+            newMinion = dynamic_cast<Minion_t*>(new ChengMinion_t());
+            MinionList.insert( newMinion );
+            break;
+        case JouMinion :
+            newMinion = dynamic_cast<Minion_t*>(new JouMinion_t());
+            MinionList.insert( newMinion );
+            break;
+        case LeeMinion :
+            newMinion = dynamic_cast<Minion_t*>(new LeeMinion_t());
+            MinionList.insert( newMinion );
+            break;
+        case TsaiMinion :
+            newMinion = dynamic_cast<Minion_t*>(new TsaiMinion_t());
+            MinionList.insert( newMinion );
+            break;
 
     }
     newMinion->Team = Team;
     newMinion->Pos = Position;
+    newMinion->TargetPos = QPointF(1000, newMinion->Pos.y());
     newMinion->Center = QPointF(newMinion->Pos.x() + newMinion->pixmap().size().width()/2 , newMinion->Pos.y() + newMinion->pixmap().size().height()/2);
     newMinion->setPos( newMinion->Pos );
     connect(newMinion, SIGNAL(died(Minion_t*)), this, SLOT(receivedMinionDied(Minion_t*)));
     connect(newMinion, SIGNAL(request_FindTarget(Life_t*,LifeTeam,Life_t*&)), this, SLOT(received_FindTarget(Life_t*,LifeTeam,Life_t*&)));
     connect(newMinion, SIGNAL(request_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&,int)), this, SLOT(received_FindAllTarget(Life_t*,LifeTeam,QList<Life_t*>&,int)));
     connect(newMinion, SIGNAL(emit_ArrowAttack(Life_t*,double,QPointF)), this, SLOT(receive_ArrowAttack(Life_t*,double,QPointF)));
-    connect(newMinion, SIGNAL(request_Animation(QPointF,int,QList<QString>&)), this, SLOT(received_Animation(QPointF,int,QList<QString>&)));
+    connect(newMinion, SIGNAL(request_Animation(QPointF)), this, SLOT(received_Animation(QPointF)));
     connect(newMinion, SIGNAL(request_RangeAttack(Life_t*,QPointF,double,double,LifeTeam)), this, SLOT(received_RangeAttack(Life_t*,QPointF,double,double,LifeTeam)));
     return newMinion;
 }
 
 void MinionManager_t::removeMinion(Minion_t* rmMinion)
 {
+    emit emit_MinionRemoved(rmMinion);
     auto it = this->MinionList.find(rmMinion);
     if(it != this->MinionList.end())
     {
@@ -118,9 +175,9 @@ void MinionManager_t::receive_ArrowAttack(Life_t *target, double damage, QPointF
     emit emit_ArrowAttack(target, damage, pos);
 }
 
-void MinionManager_t::received_Animation(QPointF center, int period, QList<QString> &pathList)
+void MinionManager_t::received_Animation(QPointF center)
 {
-    emit request_Animation(center, period, pathList);
+    emit request_Animation(center);
 }
 
 void MinionManager_t::received_RangeAttack(Life_t *requester, QPointF center, double range, double damage, LifeTeam targetTeam)
@@ -153,7 +210,7 @@ DerivedMinion_t::DerivedMinion_t() : Minion_t()
     this->setPixmap( * (this->BasicImage) );
 
     // DBG
-    this->Range = 0;
+    this->Range = 100;
     this->HP = 10;
     this->Hz = 1;
 
@@ -166,6 +223,71 @@ DerivedMinion_t::~DerivedMinion_t()
 }
 
 void DerivedMinion_t::run()
+{
+    if(this->checkDied()) //  if the minion died, then checkDied() will emit signal "died()" to MinionManager, then this will be deleted
+        return;
+
+    //DBG
+    this->Damage = 10;
+
+    Life_t* tarLife; // receive the response of findTarget()
+    findTarget(tarLife);
+
+    if(tarLife == nullptr) // none is in Range
+    {
+        //DBG
+        this->Speed = 10;
+
+        move();
+    }
+    else
+    {
+        if( dynamic_cast<Minion_t*>(tarLife) ) // if the response is a Minion
+        {
+            // DBG
+            //arrowAttack(tarLife);
+        }
+        else if( dynamic_cast<Tower_t*>(tarLife) ) // if the response is a Tower
+        {
+            // DBG
+            arrowAttack(tarLife);
+        }
+    }
+}
+
+void DerivedMinion_t::attack(Life_t *target)
+{
+
+}
+
+
+// ChairMinion_t
+QPixmap* ChairMinion_t::BasicImage = nullptr;
+QPixmap* ChairMinion_t::ButtonImage = nullptr;
+
+ChairMinion_t::ChairMinion_t() : Minion_t()
+{
+    if( ChairMinion_t::BasicImage == nullptr ) // construct Pixmaps if they haven't been constructed
+    {
+        ChairMinion_t::BasicImage = new QPixmap("./resources/images/chair_minion.jpg");
+        ChairMinion_t::ButtonImage = new QPixmap("./resources/images/chair_button.jpg");
+    }
+    this->setPixmap( * (this->BasicImage) );
+
+    // DBG
+    this->Range = 100;
+    this->HP = 10;
+    this->Hz = 1;
+
+    this->Timer->start(1000 / Hz);
+}
+
+ChairMinion_t::~ChairMinion_t()
+{
+    // need not delete BasicImage, MovingImages...... because they are static
+}
+
+void ChairMinion_t::run()
 {
     if(this->checkDied()) //  if the minion died, then checkDied() will emit signal "died()" to MinionManager, then this will be deleted
         return;
@@ -198,7 +320,332 @@ void DerivedMinion_t::run()
     }
 }
 
-void DerivedMinion_t::attack(Life_t *target)
+void ChairMinion_t::attack(Life_t *target)
+{
+
+}
+
+
+// ChangMinion_t
+QPixmap* ChangMinion_t::BasicImage = nullptr;
+QPixmap* ChangMinion_t::ButtonImage = nullptr;
+
+ChangMinion_t::ChangMinion_t() : Minion_t()
+{
+    if( ChangMinion_t::BasicImage == nullptr ) // construct Pixmaps if they haven't been constructed
+    {
+        ChangMinion_t::BasicImage = new QPixmap("./resources/images/chang_minion.jpg");
+        ChangMinion_t::ButtonImage = new QPixmap("./resources/images/chang_button.jpg");
+    }
+    this->setPixmap( * (this->BasicImage) );
+
+    // DBG
+    this->Range = 100;
+    this->HP = 10;
+    this->Hz = 1;
+
+    this->Timer->start(1000 / Hz);
+}
+
+ChangMinion_t::~ChangMinion_t()
+{
+    // need not delete BasicImage, MovingImages...... because they are static
+}
+
+void ChangMinion_t::run()
+{
+    if(this->checkDied()) //  if the minion died, then checkDied() will emit signal "died()" to MinionManager, then this will be deleted
+        return;
+
+    //DBG
+    this->Damage = 1;
+
+    Life_t* tarLife; // receive the response of findTarget()
+    findTarget(tarLife);
+
+    if(tarLife == nullptr) // none is in Range
+    {
+        //DBG
+        this->Speed = 10;
+
+        move();
+    }
+    else
+    {
+        if( dynamic_cast<Minion_t*>(tarLife) ) // if the response is a Minion
+        {
+            // DBG
+            //arrowAttack(tarLife);
+        }
+        else if( dynamic_cast<Tower_t*>(tarLife) ) // if the response is a Tower
+        {
+            // DBG
+            arrowAttack(tarLife);
+        }
+    }
+}
+
+void ChangMinion_t::attack(Life_t *target)
+{
+
+}
+
+
+// ChengMinion_t
+QPixmap* ChengMinion_t::BasicImage = nullptr;
+QPixmap* ChengMinion_t::ButtonImage = nullptr;
+
+ChengMinion_t::ChengMinion_t() : Minion_t()
+{
+    if( ChengMinion_t::BasicImage == nullptr ) // construct Pixmaps if they haven't been constructed
+    {
+        ChengMinion_t::BasicImage = new QPixmap("./resources/images/cheng_minion.jpg");
+        ChengMinion_t::ButtonImage = new QPixmap("./resources/images/cheng_button.jpg");
+    }
+    this->setPixmap( * (this->BasicImage) );
+
+    // DBG
+    this->Range = 100;
+    this->HP = 10;
+    this->Hz = 1;
+
+    this->Timer->start(1000 / Hz);
+}
+
+ChengMinion_t::~ChengMinion_t()
+{
+    // need not delete BasicImage, MovingImages...... because they are static
+}
+
+void ChengMinion_t::run()
+{
+    if(this->checkDied()) //  if the minion died, then checkDied() will emit signal "died()" to MinionManager, then this will be deleted
+        return;
+
+    //DBG
+    this->Damage = 1;
+
+    Life_t* tarLife; // receive the response of findTarget()
+    findTarget(tarLife);
+
+    if(tarLife == nullptr) // none is in Range
+    {
+        //DBG
+        this->Speed = 10;
+
+        move();
+    }
+    else
+    {
+        if( dynamic_cast<Minion_t*>(tarLife) ) // if the response is a Minion
+        {
+            // DBG
+            //arrowAttack(tarLife);
+        }
+        else if( dynamic_cast<Tower_t*>(tarLife) ) // if the response is a Tower
+        {
+            // DBG
+            arrowAttack(tarLife);
+        }
+    }
+}
+
+void ChengMinion_t::attack(Life_t *target)
+{
+
+}
+
+
+// JouMinion_t
+QPixmap* JouMinion_t::BasicImage = nullptr;
+QPixmap* JouMinion_t::ButtonImage = nullptr;
+
+JouMinion_t::JouMinion_t() : Minion_t()
+{
+    if( JouMinion_t::BasicImage == nullptr ) // construct Pixmaps if they haven't been constructed
+    {
+        JouMinion_t::BasicImage = new QPixmap("./resources/images/jou_minion.jpg");
+        JouMinion_t::ButtonImage = new QPixmap("./resources/images/jou_button.jpg");
+    }
+    this->setPixmap( * (this->BasicImage) );
+
+    // DBG
+    this->Range = 100;
+    this->HP = 10;
+    this->Hz = 1;
+
+    this->Timer->start(1000 / Hz);
+}
+
+JouMinion_t::~JouMinion_t()
+{
+    // need not delete BasicImage, MovingImages...... because they are static
+}
+
+void JouMinion_t::run()
+{
+    if(this->checkDied()) //  if the minion died, then checkDied() will emit signal "died()" to MinionManager, then this will be deleted
+        return;
+
+    //DBG
+    this->Damage = 1;
+
+    Life_t* tarLife; // receive the response of findTarget()
+    findTarget(tarLife);
+
+    if(tarLife == nullptr) // none is in Range
+    {
+        //DBG
+        this->Speed = 10;
+
+        move();
+    }
+    else
+    {
+        if( dynamic_cast<Minion_t*>(tarLife) ) // if the response is a Minion
+        {
+            // DBG
+            //arrowAttack(tarLife);
+        }
+        else if( dynamic_cast<Tower_t*>(tarLife) ) // if the response is a Tower
+        {
+            // DBG
+            arrowAttack(tarLife);
+        }
+    }
+}
+
+void JouMinion_t::attack(Life_t *target)
+{
+
+}
+
+
+// LeeMinion_t
+QPixmap* LeeMinion_t::BasicImage = nullptr;
+QPixmap* LeeMinion_t::ButtonImage = nullptr;
+
+LeeMinion_t::LeeMinion_t() : Minion_t()
+{
+    if( LeeMinion_t::BasicImage == nullptr ) // construct Pixmaps if they haven't been constructed
+    {
+        LeeMinion_t::BasicImage = new QPixmap("./resources/images/lee_minion.jpg");
+        LeeMinion_t::ButtonImage = new QPixmap("./resources/images/lee_button.jpg");
+    }
+    this->setPixmap( * (this->BasicImage) );
+
+    // DBG
+    this->Range = 100;
+    this->HP = 10;
+    this->Hz = 1;
+
+    this->Timer->start(1000 / Hz);
+}
+
+LeeMinion_t::~LeeMinion_t()
+{
+    // need not delete BasicImage, MovingImages...... because they are static
+}
+
+void LeeMinion_t::run()
+{
+    if(this->checkDied()) //  if the minion died, then checkDied() will emit signal "died()" to MinionManager, then this will be deleted
+        return;
+
+    //DBG
+    this->Damage = 1;
+
+    Life_t* tarLife; // receive the response of findTarget()
+    findTarget(tarLife);
+
+    if(tarLife == nullptr) // none is in Range
+    {
+        //DBG
+        this->Speed = 10;
+
+        move();
+    }
+    else
+    {
+        if( dynamic_cast<Minion_t*>(tarLife) ) // if the response is a Minion
+        {
+            // DBG
+            //arrowAttack(tarLife);
+        }
+        else if( dynamic_cast<Tower_t*>(tarLife) ) // if the response is a Tower
+        {
+            // DBG
+            arrowAttack(tarLife);
+        }
+    }
+}
+
+void LeeMinion_t::attack(Life_t *target)
+{
+
+}
+
+
+// TsaiMinion_t
+QPixmap* TsaiMinion_t::BasicImage = nullptr;
+QPixmap* TsaiMinion_t::ButtonImage = nullptr;
+
+TsaiMinion_t::TsaiMinion_t() : Minion_t()
+{
+    if( TsaiMinion_t::BasicImage == nullptr ) // construct Pixmaps if they haven't been constructed
+    {
+        TsaiMinion_t::BasicImage = new QPixmap("./resources/images/tsai_minion.jpg");
+        TsaiMinion_t::ButtonImage = new QPixmap("./resources/images/tsai_button.jpg");
+    }
+    this->setPixmap( * (this->BasicImage) );
+
+    // DBG
+    this->Range = 100;
+    this->HP = 10;
+    this->Hz = 1;
+
+    this->Timer->start(1000 / Hz);
+}
+
+TsaiMinion_t::~TsaiMinion_t()
+{
+    // need not delete BasicImage, MovingImages...... because they are static
+}
+
+void TsaiMinion_t::run()
+{
+    if(this->checkDied()) //  if the minion died, then checkDied() will emit signal "died()" to MinionManager, then this will be deleted
+        return;
+
+    //DBG
+    this->Damage = 1;
+
+    Life_t* tarLife; // receive the response of findTarget()
+    findTarget(tarLife);
+
+    if(tarLife == nullptr) // none is in Range
+    {
+        //DBG
+        this->Speed = 10;
+
+        move();
+    }
+    else
+    {
+        if( dynamic_cast<Minion_t*>(tarLife) ) // if the response is a Minion
+        {
+            // DBG
+            //arrowAttack(tarLife);
+        }
+        else if( dynamic_cast<Tower_t*>(tarLife) ) // if the response is a Tower
+        {
+            // DBG
+            arrowAttack(tarLife);
+        }
+    }
+}
+
+void TsaiMinion_t::attack(Life_t *target)
 {
 
 }

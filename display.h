@@ -50,6 +50,7 @@ class MyQGraphicsScene : public QGraphicsScene
 public:
     MyQGraphicsScene();
     ~MyQGraphicsScene();
+    QSet<Animation_t*> AnimationList;
 
 public slots:
     // rendering the BlackScreen(QImage) and update PixmapItem
@@ -59,9 +60,11 @@ public slots:
 
 signals:
     void positionSelected(QPointF Position);
+    void keyPressed(int key);
 
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
+    virtual void keyPressEvent(QKeyEvent* event);
     QImage* BlackScreen;
     QGraphicsPixmapItem* BlackScreenItem;
     QTimer* Timer; // for updating BlackScreen
@@ -168,7 +171,7 @@ public slots:
     void CardBuyScene_BlackJackClicked();
 
 
-    void changetoGameOverScene();
+    void changetoGameOverScene(int Winner);
 
 
     void changetoBlackJackScene();
@@ -177,13 +180,14 @@ public slots:
     void BlackJackScene_MoreCardClicked();
 
 signals:
-    void setupCompleted();
+    void setupCompleted(QList<int> cardSelected);
     void accountLogined(Account_t*);
 };
 
 class Display_t
 {
     friend class System;
+    friend int main(int argc, char *argv[]);
 public:
     Display_t();
     virtual ~Display_t();
@@ -193,12 +197,12 @@ public:
     void changetoGameScene();
     void changetoLoginScene();
     void changetoCardManageScene();
-    void changetoGameOverScene();
+    void changetoGameOverScene(int Winner);
 
     void addItem(QGraphicsItem* Item);
     void removeItem(QGraphicsItem* Item);
 
-    void addAnimation(QPointF center, int period, QList<QString> &pathList);
+    void addAnimation(QPointF center);
 
 protected:
     MyQGraphicsScene* Scene; // GameScene
@@ -223,6 +227,7 @@ public:
 public slots:
     void minionSelected(Minion_t* selMinion);
     void positionSelected(QPointF Position);
+    void keyPressed(int key);
 
 protected:
 
