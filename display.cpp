@@ -879,7 +879,7 @@ MyQGraphicsScene::~MyQGraphicsScene()
 
 void MyQGraphicsScene::updateBlackScreen()
 {
-    BlackScreen->fill( QColor(0, 0, 0, 150) ); // completely black
+    BlackScreen->fill( QColor(0, 0, 0, 255) ); // completely black
     for(int i=0;i<25;++i) // button and label on battlefield
     {
         QRgb* Player1Score_Label = reinterpret_cast<QRgb*>(BlackScreen->scanLine(i));

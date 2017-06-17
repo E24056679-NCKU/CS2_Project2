@@ -175,7 +175,7 @@ void System::changeButtonImage(int ButtonID, MinionType minionType)
 {
     if( minionType == -1 )
     {
-        Display->Button[ ButtonID ]->setPixmap( QPixmap("./resources/images/Button_Black.jpg") );
+        Display->Button[ ButtonID ]->setPixmap( QPixmap("./resources/images/Button.jpg") );
     }
     else if( minionType == MinionType::ChairMinion )
     {
