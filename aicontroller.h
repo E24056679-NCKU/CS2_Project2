@@ -6,14 +6,14 @@
 
 class AIController_t : public ControllerSlot_t
 {
+    Q_OBJECT
 public:
     AIController_t();
     ~AIController_t();
-    void randomlyPlay();
-
-protected:
     QTimer* Timer;
 
+public slots:
+    void playRandomly();
 };
 
 #endif // AICONTROLLER_T_H

@@ -110,7 +110,7 @@ void BattleManager_t::countDown()
     CountDown_Label->setText( QString::number(CountDown/100) );
     Player1Score_Label->setText( QString::number(Player1Score) );
     Player2Score_Label->setText( QString::number(Player2Score) );
-    if(CountDown == 0)
+    if(CountDown == 0 || TowerManager->TowerList[0] == nullptr || TowerManager->TowerList[3] == nullptr)
     {
         Timer->stop();
         emit gameOver(Player1Score, Player2Score);
@@ -134,7 +134,7 @@ void BattleManager_t::addArrow(Life_t *target, double damage, QPointF pos)
 
 void BattleManager_t::received_Animation(QPointF center)
 {
-    Player1Score -= 10;
+    Player1Score -= 100;
     emit request_Animation(center);
 }
 
@@ -193,9 +193,31 @@ void BattleManager_t::rangeAttack(Life_t* requester, QPointF center, double rang
 void BattleManager_t::received_MinionRemoved(Minion_t *rmMinion)
 {
     if( rmMinion == this->MinionSelected_Player1 )
+    {
+        Player2Score += 100;
         MinionSelected_Player1 = nullptr;
+    }
     else if( rmMinion == this->MinionSelected_Player2 )
+    {
+        Player1Score += 100;
         MinionSelected_Player2 = nullptr;
+    }
+}
+
+void BattleManager_t::received_TowerRemoved(Tower_t *rmTower)
+{
+    if( rmTower->Team == TowerTeam::MyTeam )
+    {
+        Player2Score += 1000;
+        if( rmTower->TType == TowerType::MainTower )
+            Player2Score += 4000;
+    }
+    else if( rmTower->Team == TowerTeam::OpsTeam )
+    {
+        Player1Score += 1000;
+        if( rmTower->TType == TowerType::MainTower )
+            Player2Score += 4000;
+    }
 }
 
 void BattleManager_t::skillButtonClicked()
@@ -341,33 +363,27 @@ void BattleManager_t::findAllLifeInRange(Life_t *requester, LifeTeam tarTeam, QL
 
 void BattleManager_t::receivedSignal1_SelectPosition(QPointF Position)
 {
-    // !!
-    // CardInDeck_Player1[ CardSelected_Player1 ]
-    // this is the minion's id
-    // !!
-
     if(CardSelected_Player1 == -1 && MinionSelected_Player1 != nullptr)
     {
         // hero
         this->MinionSelected_Player1->TargetPos = QPointF( qRound(Position.x()) , qRound(Position.y()) );
     }
-    else if(CardSelected_Player1!= -1 && MinionSelected_Player1 == nullptr)
+    else if( CardInDeck_Player1[CardSelected_Player1] != -1 && MinionSelected_Player1 == nullptr)
     {
         // create new minion
-
-        // DBG
-        // these two lines are used to test connection with ControllableDisplay
+        if( Position.x() > 400 )
+            return;
         this->addMinion( static_cast<MinionType>(CardInDeck_Player1[CardSelected_Player1]) , MinionTeam::MyTeam, Position);
+        Player1Score -= 10;
     }
-
-    //updateCard(CardSelected_Player1, this->Player1);
 }
 
 void BattleManager_t::receivedSignal1_SelectMinion(Minion_t *selMinion)
 {
-    qDebug() << "BM, sig1, selMini, DBG";
     if(MinionSelected_Player1 != nullptr)
         MinionSelected_Player1->TargetPos = QPointF(1000, MinionSelected_Player1->TargetPos.y()); // reset original selected minion's targetpos
+    if( selMinion->Team != MinionTeam::MyTeam )
+        return;
     MinionSelected_Player1 = selMinion;
     CardSelected_Player1 = -1;
 }
@@ -382,51 +398,31 @@ void BattleManager_t::receivedSignal1_KeyPressed(int key)
 {
     if( MinionSelected_Player1 != nullptr && key == Qt::Key_Space ) // hero launch skill
     {
-        qDebug() << "launch";
         MinionSelected_Player1->skill();
     }
 }
 
 void BattleManager_t::receivedSignal2_SelectPosition(QPointF Position)
 {
-    /*
-    if(CardSelected_Player2 == -1 && MinionSelected_Player2 != nullptr)
+    if(CardSelected_Player2 != -1)
     {
-
+        if( Position.x() < 400 )
+            return;
+        this->addMinion( static_cast<MinionType>(CardInDeck_Player2[CardSelected_Player2]) , MinionTeam::OpsTeam, Position);
+        Player2Score -= 10;
     }
-    else if(CardSelected_Player2!= -1 && MinionSelected_Player2 == nullptr)
-    {
-        // create new minion
-
-        // DBG
-        // these two lines are used to test connection with ControllableDisplay
-        qDebug() << "BM, sig2, pos, DBG";
-        this->addMinion( MinionType::DerivedMinion , MinionTeam::OpsTeam, Position);
-
-
-        // !! recover this line, this->addMinion( CardtoMinionType_Player1[CardSelected_Player1] , MinionTeam::MyTeam, Position);
-    }
-    */
 }
 
 void BattleManager_t::receivedSignal2_SelectMinion(Minion_t *selMinion)
 {
-    /*
-    qDebug() << "BM, sig1, selMini, DBG";
-    CardSelected_Player2 = -1;
-    MinionSelected_Player2 = selMinion;
-    */
 }
 
 void BattleManager_t::receivedSignal2_SelectCard(int ButtonID)
 {
-    /*
-    MinionSelected_Player2 = nullptr;
+    // MinionSelected_Player2 = nullptr;
     CardSelected_Player2 = ButtonID;
-    */
 }
 
 void BattleManager_t::receivedSignal2_KeyPressed(int key)
 {
-
 }

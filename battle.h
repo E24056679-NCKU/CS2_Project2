@@ -70,6 +70,7 @@ public slots:
     void rangeAttack(Life_t* requester, QPointF center, double range, double damage, LifeTeam targetTeam);
 
     void received_MinionRemoved(Minion_t* rmMinion);
+    void received_TowerRemoved(Tower_t* rmTower);
 
     void skillButtonClicked();
 

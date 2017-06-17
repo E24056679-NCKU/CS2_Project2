@@ -26,6 +26,7 @@ class Tower_t : public Life_t
 public:
     Tower_t();
     ~Tower_t();
+    TowerType TType;
 
     bool checkDied();
 
@@ -60,6 +61,7 @@ signals:
     void request_FindTarget(Life_t* requester, LifeTeam tarTeam, Life_t* &response); // response is a reference
     void request_FindAllTarget(Life_t* requester, LifeTeam tarTeam, QList<Life_t*> &response, int SizeLimit);
     void emit_ArrowAttack(Life_t* target, double damage, QPointF pos);
+    void emit_TowerRemoved(Tower_t* rmTower);
 
 private:
     // TL[0] is my main tower; TL[1] is the tower on the left side of TL[0]

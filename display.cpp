@@ -823,13 +823,11 @@ ControllableDisplay_t::~ControllableDisplay_t()
 
 void ControllableDisplay_t::minionSelected(Minion_t* selMinion)
 {
-    qDebug() << "CD got minSel";
     emit receivedSignal_SelectMinion(selMinion);
 }
 
 void ControllableDisplay_t::positionSelected(QPointF Position)
 {
-    qDebug() << "CD got posSel, " << Position.x(), Position.y();
     emit receivedSignal_SelectPosition(Position);
 }
 
@@ -840,7 +838,6 @@ void ControllableDisplay_t::keyPressed(int key)
 
 void Minion_t::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    qDebug() << "press";
     emit selectedByMouse(this);
 }
 
@@ -987,8 +984,6 @@ void MyQGraphicsScene::renderFlashlightEffect(QImage &Image, QPointF Source, dou
 void MyQGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     QPointF pos = event->scenePos().toPoint();
-    qDebug() << "scene received event , pos = " << pos ;
-    qDebug() << "scene items size = " << QGraphicsScene::items(pos).size();
     if( QGraphicsScene::items(pos).size() == 0 )
     {
         emit positionSelected(pos);

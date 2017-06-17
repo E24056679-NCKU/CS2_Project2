@@ -24,9 +24,6 @@ void Life_t::findTarget(Life_t *&response)
     else if( this->Team == LifeTeam::OpsTeam )
         tarTeam = LifeTeam::MyTeam;
 
-    // DBG
-    tarTeam = LifeTeam::MyTeam;
-
     emit request_FindTarget( dynamic_cast<Life_t*>(this) , tarTeam, response);
 }
 
@@ -37,9 +34,6 @@ void Life_t::findAllTarget(QList<Life_t *> &response, int SizeLimit)
         tarTeam = LifeTeam::OpsTeam;
     else if( this->Team == LifeTeam::OpsTeam )
         tarTeam = LifeTeam::MyTeam;
-
-    // DBG
-    tarTeam = LifeTeam::MyTeam;
 
     emit request_FindAllTarget( dynamic_cast<Life_t*>(this) , tarTeam, response, SizeLimit);
 }

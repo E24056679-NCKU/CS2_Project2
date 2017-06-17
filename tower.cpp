@@ -6,8 +6,6 @@ Tower_t::Tower_t() : Life_t()
     this->setZValue(-1);
     this->LType = LifeType::Tower;
 
-    //DBG
-    this->HP = 100;
     this->Hz = 1;
 }
 
@@ -34,32 +32,16 @@ void Tower_t::run()
     if(this->checkDied())
         return;
 
-    // DBG
-    this->Range = 300;
-    this->Damage = 1;
-
-    /*
-    Life_t* tarLife;
-    findTarget(tarLife);
-    */
     QList<Life_t*> tarLifeList;
     findAllTarget(tarLifeList, 3);
 
-    if( tarLifeList.empty() ) // no life in range
-    {
-
-    }
-    else
-    {
-        // DBG
-        for( auto &i : tarLifeList )
-            attack(i);
-    }
+    for( auto &i : tarLifeList )
+        attack(i);
 }
 
 void Tower_t::attack(Life_t *target)
 {
-    //arrowAttack(target);
+    arrowAttack(target);
 }
 
 TowerManager_t::TowerManager_t() : QObject()
@@ -81,10 +63,18 @@ void TowerManager_t::initializeTowers()
         TowerList[i] = new Tower_t();
         if(i % 3) // normal tower
         {
+            TowerList[i]->HP = 1000;
+            TowerList[i]->Damage = 50;
+            TowerList[i]->Range = 200;
+            TowerList[i]->TType = TowerType::NormalTower;
             TowerList[i]->setPixmap(QPixmap("./resources/images/Tower.jpg"));
         }
         else
         {
+            TowerList[i]->HP = 3000;
+            TowerList[i]->Damage = 100;
+            TowerList[i]->Range = 300;
+            TowerList[i]->TType = TowerType::MainTower;
             TowerList[i]->setPixmap(QPixmap("./resources/images/MainTower.jpg"));
         }
         emit itemAdded( dynamic_cast<QGraphicsItem*>(TowerList[i]) );
@@ -103,7 +93,6 @@ void TowerManager_t::initializeTowers()
     for(int i=0;i<6;++i)
     {
         TowerList[i]->setPos(TowerList[i]->Pos);
-        TowerList[i]->Range = 100;
         if( i < 3 )
             TowerList[i]->Team = TowerTeam::MyTeam;
         else
@@ -118,6 +107,7 @@ void TowerManager_t::initializeTowers()
 
 void TowerManager_t::receivedTowerDied(Tower_t *rmTower)
 {
+    emit emit_TowerRemoved( rmTower );
     for(int i=0;i<6;++i)
         if( TowerList[i] == rmTower )
             TowerList[i] = nullptr;

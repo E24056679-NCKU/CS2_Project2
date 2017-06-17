@@ -31,18 +31,18 @@ System::System(ControllerSlot_t* Controller1 = nullptr, ControllerSlot_t* Contro
 
     if(Controller2 == nullptr)
     {
-        AIController = new AIController_t;
+        AIController = new AIController_t();
         ControllerSlot[1] = dynamic_cast<ControllerSlot_t*>(AIController);
     }
     else
     {
         AIController = nullptr;
-        ControllerSlot[1] = Controller1;
+        ControllerSlot[1] = Controller2;
     }
     // connect controller
-    connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectCard(int)), this, SLOT(receivedSignal1_SelectCard(int)));
-    connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectMinion(Minion_t*)), this, SLOT(receivedSignal1_SelectMinion(Minion_t*)));
-    connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectPosition(QPointF)), this, SLOT(receivedSignal1_SelectPosition(QPointF)));
+    connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectCard(int)), this, SLOT(receivedSignal2_SelectCard(int)));
+    connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectMinion(Minion_t*)), this, SLOT(receivedSignal2_SelectMinion(Minion_t*)));
+    connect(ControllerSlot[1], SIGNAL(receivedSignal_SelectPosition(QPointF)), this, SLOT(receivedSignal2_SelectPosition(QPointF)));
     connect(ControllerSlot[1], SIGNAL(receivedSignal_KeyPressed(int)), this, SLOT(receivedSignal2_KeyPressed(int)));
 
     BattleManager = new BattleManager_t();
@@ -84,10 +84,14 @@ void System::startGame(QList<int> cardSelected)
 {
     Display->changetoGameScene();
     BattleManager->setupCards(cardSelected, BattleManager->Player1);
-    BattleManager->Timer->start(10); // start game
 
-    //DBG
-    // BattleManager->addMinion(MinionType::DerivedMinion, MinionTeam::MyTeam, QPointF(400, 300));
+    QList<int> Player2Cards;
+    for(int i=0;i<4;++i)
+        Player2Cards.push_back(i);
+    BattleManager->setupCards(Player2Cards, BattleManager->Player2);
+
+    BattleManager->Timer->start(10); // start game
+    AIController->Timer->start(5000);
 }
 
 void System::receivedGameOver(int score1, int score2)
