@@ -804,7 +804,7 @@ void Display_t::removeItem(QGraphicsItem *Item)
 void Display_t::addAnimation(QPointF center)
 {
     // this->addItem( dynamic_cast<QGraphicsItem*>(new Animation_t(center, period, pathList)) );
-    Animation_t *ani = new Animation_t(center, "./resources/images/eff.gif", &this->Scene->AnimationList);
+    Animation_t *ani = new Animation_t(center, "./resources/images/eff_5050.gif", &this->Scene->AnimationList);
     this->Scene->addWidget( ani );
 }
 
@@ -879,7 +879,7 @@ MyQGraphicsScene::~MyQGraphicsScene()
 
 void MyQGraphicsScene::updateBlackScreen()
 {
-    BlackScreen->fill( QColor(0, 0, 0, 255) ); // completely black
+    BlackScreen->fill( QColor(0, 0, 0, 150) ); // completely black
     for(int i=0;i<25;++i) // button and label on battlefield
     {
         QRgb* Player1Score_Label = reinterpret_cast<QRgb*>(BlackScreen->scanLine(i));
@@ -944,10 +944,10 @@ void MyQGraphicsScene::updateBlackScreen()
         // if(ani != nullptr) // if the item is a Animation
         for(auto &ani : this->AnimationList)
         {
-            int lb = std::max(0.0, ani->Center.x() - 100); // left bound
-            int rb = std::min(799.0, ani->Center.x() + 100); // right
-            int ub = std::max(0.0, ani->Center.y() - 100); // up
-            int db = std::min(599.0, ani->Center.y() + 100); // down
+            int lb = std::max(0.0, ani->Center.x() - 75); // left bound
+            int rb = std::min(799.0, ani->Center.x() + 75); // right
+            int ub = std::max(0.0, ani->Center.y() - 75); // up
+            int db = std::min(599.0, ani->Center.y() + 75); // down
 
             for(int i=ub;i<=db;++i)
             {

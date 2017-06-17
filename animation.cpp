@@ -4,7 +4,7 @@ Animation_t::Animation_t(QPointF Center, QString filename, QSet<Animation_t*> * 
 {
     this->ParentSet = parentSet;
     this->ParentSet->insert(this);
-    this->setGeometry(Center.x() - 50, Center.y() - 50, 100, 100);
+    this->setGeometry(Center.x() - 25, Center.y() - 25, 50, 50);
     this->Center = Center;
     Timer = new QTimer;
     Gif = new QMovie(filename);

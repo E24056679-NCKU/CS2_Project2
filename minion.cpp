@@ -66,7 +66,7 @@ void Minion_t::skill()
     this->request_FindAllTarget(this, tarTeam, attackee, 9999);
     for(auto &i : attackee)
     {
-        i->HP -= this->Damage;
+        i->HP -= (this->Damage * 2); // Damage = 200%
         this->request_Animation( i->Center );
     }
 }
@@ -205,7 +205,7 @@ DerivedMinion_t::DerivedMinion_t() : Minion_t()
 
     this->Speed = 10;
     this->Range = 100;
-    this->HP = 50;
+    this->HP = 250;
     this->Damage = 10;
     this->Hz = 1;
 
@@ -262,7 +262,7 @@ ChairMinion_t::ChairMinion_t() : Minion_t()
 
     this->Speed = 10;
     this->Range = 100;
-    this->HP = 50;
+    this->HP = 250;
     this->Damage = 10;
     this->Hz = 1;
 
@@ -319,7 +319,7 @@ ChangMinion_t::ChangMinion_t() : Minion_t()
 
     this->Speed = 10;
     this->Range = 100;
-    this->HP = 50;
+    this->HP = 250;
     this->Damage = 10;
     this->Hz = 1;
 
@@ -376,7 +376,7 @@ ChengMinion_t::ChengMinion_t() : Minion_t()
 
     this->Speed = 10;
     this->Range = 100;
-    this->HP = 50;
+    this->HP = 250;
     this->Damage = 10;
     this->Hz = 1;
 
@@ -433,7 +433,7 @@ JouMinion_t::JouMinion_t() : Minion_t()
 
     this->Speed = 10;
     this->Range = 100;
-    this->HP = 50;
+    this->HP = 250;
     this->Damage = 10;
     this->Hz = 1;
 
@@ -490,7 +490,7 @@ LeeMinion_t::LeeMinion_t() : Minion_t()
 
     this->Speed = 10;
     this->Range = 100;
-    this->HP = 50;
+    this->HP = 250;
     this->Damage = 10;
     this->Hz = 1;
 
@@ -547,7 +547,7 @@ TsaiMinion_t::TsaiMinion_t() : Minion_t()
 
     this->Speed = 10;
     this->Range = 100;
-    this->HP = 50;
+    this->HP = 250;
     this->Damage = 10;
     this->Hz = 1;
 
