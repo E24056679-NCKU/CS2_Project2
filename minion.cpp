@@ -317,9 +317,9 @@ ChangMinion_t::ChangMinion_t() : Minion_t()
     }
     this->setPixmap( * (this->BasicImage) );
 
-    this->Speed = 10;
+    this->Speed = 5;
     this->Range = 100;
-    this->HP = 250;
+    this->HP = 500;
     this->Damage = 10;
     this->Hz = 1;
 
@@ -374,10 +374,10 @@ ChengMinion_t::ChengMinion_t() : Minion_t()
     }
     this->setPixmap( * (this->BasicImage) );
 
-    this->Speed = 10;
+    this->Speed = 15;
     this->Range = 100;
-    this->HP = 250;
-    this->Damage = 10;
+    this->HP = 200;
+    this->Damage = 15;
     this->Hz = 1;
 
     this->Timer->start(1000 / Hz);
@@ -432,9 +432,9 @@ JouMinion_t::JouMinion_t() : Minion_t()
     this->setPixmap( * (this->BasicImage) );
 
     this->Speed = 10;
-    this->Range = 100;
-    this->HP = 250;
-    this->Damage = 10;
+    this->Range = 200;
+    this->HP = 150;
+    this->Damage = 20;
     this->Hz = 1;
 
     this->Timer->start(1000 / Hz);
@@ -488,10 +488,10 @@ LeeMinion_t::LeeMinion_t() : Minion_t()
     }
     this->setPixmap( * (this->BasicImage) );
 
-    this->Speed = 10;
-    this->Range = 100;
+    this->Speed = 5;
+    this->Range = 500;
     this->HP = 250;
-    this->Damage = 10;
+    this->Damage = 5;
     this->Hz = 1;
 
     this->Timer->start(1000 / Hz);
@@ -546,9 +546,9 @@ TsaiMinion_t::TsaiMinion_t() : Minion_t()
     this->setPixmap( * (this->BasicImage) );
 
     this->Speed = 10;
-    this->Range = 100;
-    this->HP = 250;
-    this->Damage = 10;
+    this->Range = 150;
+    this->HP = 300;
+    this->Damage = 15;
     this->Hz = 1;
 
     this->Timer->start(1000 / Hz);
