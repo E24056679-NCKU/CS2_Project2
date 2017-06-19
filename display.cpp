@@ -237,6 +237,7 @@ void MenuDisplay_t::setupRankScene()
 
 void MenuDisplay_t::setupBlackJackScene()
 {
+    BlackJackGame = nullptr;
     BlackJackScene = new QGraphicsScene;
     BlackJackScene->setSceneRect(0, 0, 800, 600);
 
@@ -879,7 +880,7 @@ MyQGraphicsScene::~MyQGraphicsScene()
 
 void MyQGraphicsScene::updateBlackScreen()
 {
-    BlackScreen->fill( QColor(0, 0, 0, 255) ); // completely black
+    BlackScreen->fill( QColor(0, 0, 0, 150) ); // completely black
     for(int i=0;i<25;++i) // button and label on battlefield
     {
         QRgb* Player1Score_Label = reinterpret_cast<QRgb*>(BlackScreen->scanLine(i));
